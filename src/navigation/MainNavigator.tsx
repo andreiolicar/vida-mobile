@@ -6,13 +6,11 @@ import { useTheme } from '@/hooks';
 
 import DashboardScreen from '@/screens/home/DashboardScreen';
 import ProfileScreen from '@/screens/profile/ProfileScreen';
-import TestScreen from '@/screens/TestScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Placeholders temporários
 const RoutineScreen = () => null;
-const FocusScreen = () => null;
 const SocialScreen = () => null;
 
 export default function MainNavigator() {
@@ -51,16 +49,6 @@ export default function MainNavigator() {
                 }}
             />
             <Tab.Screen
-                name="Focus"
-                component={FocusScreen}
-                options={{
-                    tabBarLabel: 'Foco',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="timer" size={size} color={color} />
-                    ),
-                }}
-            />
-            <Tab.Screen
                 name="Social"
                 component={SocialScreen}
                 options={{
@@ -77,16 +65,6 @@ export default function MainNavigator() {
                     tabBarLabel: 'Perfil',
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" size={size} color={color} />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Test"
-                component={TestScreen}
-                options={{
-                    tabBarLabel: 'Teste',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="flask" size={size} color={color} />
                     ),
                 }}
             />

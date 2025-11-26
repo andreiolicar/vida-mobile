@@ -19,10 +19,8 @@ export type OnboardingStackParamList = {
 export type MainTabParamList = {
     Dashboard: undefined;
     Routine: undefined;
-    Focus: undefined;
     Social: undefined;
     Profile: undefined;
-    Test: undefined;
 };
 
 // Root Navigator
