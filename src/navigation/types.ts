@@ -22,6 +22,7 @@ export type MainTabParamList = {
     Focus: undefined;
     Social: undefined;
     Profile: undefined;
+    Test: undefined;
 };
 
 // Root Navigator
