@@ -10,7 +10,7 @@ export const mockDashboardData = {
   
   dailyProgress: {
     tasksCompleted: 5,
-    totalTasks: 12,
+    totalTasks: 9,
     focusMinutes: 90,
     focusGoal: 120,
   },
@@ -27,12 +27,11 @@ export const mockDashboardData = {
     },
     afternoon: {
       label: 'Tarde',
-      progress: 50,
+      progress: 67,
       tasks: [
-        { id: 'a1', title: 'Estudar React Native', status: 'completed' },
+        { id: 'a1', title: 'Estudar React', status: 'completed' },
         { id: 'a2', title: 'Fazer exercícios', status: 'in-progress' },
         { id: 'a3', title: 'Ler 30 minutos', status: 'available' },
-        { id: 'a4', title: 'Revisar código', status: 'available' },
       ],
     },
     evening: {

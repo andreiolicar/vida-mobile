@@ -8,6 +8,7 @@ export interface Theme {
   error: string;
   info: string;
   periods: typeof colors.periods;
+  taskStates: typeof colors.taskStates;
   spacing: typeof spacing;
   borderRadius: typeof borderRadius;
 }
@@ -37,6 +38,7 @@ export const lightTheme: Theme = {
   error: colors.error,
   info: colors.info,
   periods: colors.periods,
+  taskStates: colors.taskStates,
   spacing,
   borderRadius,
 };
@@ -49,6 +51,7 @@ export const darkTheme: Theme = {
   error: colors.error,
   info: colors.info,
   periods: colors.periods,
+  taskStates: colors.taskStates,
   spacing,
   borderRadius,
 };

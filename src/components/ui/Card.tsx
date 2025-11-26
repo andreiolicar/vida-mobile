@@ -3,7 +3,7 @@ import { View, StyleSheet, ViewProps } from 'react-native';
 import { useTheme } from '@/hooks';
 
 interface CardProps extends ViewProps {
-    variant?: 'default' | 'elevated' | 'outlined';
+    variant?: 'default' | 'elevated' | 'outlined' | 'duolingo';
     padding?: number;
     children: React.ReactNode;
 }
@@ -24,6 +24,12 @@ export function Card({
         variant === 'outlined' && {
             borderWidth: 1,
             borderColor: colors.border,
+        },
+        variant === 'duolingo' && {
+            borderWidth: 2,
+            borderColor: '#E5E7EB',
+            borderRadius: 16,
+            backgroundColor: colors.card,
         },
         style,
     ];

@@ -6,19 +6,13 @@ import Svg, { Circle } from 'react-native-svg';
 interface PeriodHubProps {
     period: 'morning' | 'afternoon' | 'evening';
     label: string;
-    progress: number; // 0 a 100
+    progress: number;
 }
 
 export function PeriodHub({ period, label, progress }: PeriodHubProps) {
     const { theme, colors } = useTheme();
 
-    const periodConfig = {
-        morning: { color: '#F59E0B', gradient: ['#FCD34D', '#F59E0B'] },
-        afternoon: { color: '#3B82F6', gradient: ['#60A5FA', '#3B82F6'] },
-        evening: { color: '#8B5CF6', gradient: ['#A78BFA', '#8B5CF6'] },
-    };
-
-    const config = periodConfig[period];
+    const periodColor = theme.periods[period];
     const radius = 35;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -33,7 +27,7 @@ export function PeriodHub({ period, label, progress }: PeriodHubProps) {
                         cy={45}
                         r={radius}
                         stroke={colors.border}
-                        strokeWidth={6}
+                        strokeWidth={8}
                         fill="none"
                     />
                     {/* Progress circle */}
@@ -41,8 +35,8 @@ export function PeriodHub({ period, label, progress }: PeriodHubProps) {
                         cx={45}
                         cy={45}
                         r={radius}
-                        stroke={config.color}
-                        strokeWidth={6}
+                        stroke={periodColor}
+                        strokeWidth={8}
                         fill="none"
                         strokeDasharray={circumference}
                         strokeDashoffset={strokeDashoffset}
@@ -52,8 +46,8 @@ export function PeriodHub({ period, label, progress }: PeriodHubProps) {
                     />
                 </Svg>
 
-                <View style={[styles.inner, { backgroundColor: `${config.color}20` }]}>
-                    <Text style={[styles.percentage, { color: config.color }]}>
+                <View style={[styles.inner, { backgroundColor: `${periodColor}15` }]}>
+                    <Text style={[styles.percentage, { color: periodColor }]}>
                         {Math.round(progress)}%
                     </Text>
                 </View>

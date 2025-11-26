@@ -37,7 +37,7 @@ export function XPBar({ currentXP, maxXP, level }: XPBarProps) {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 20,
+        // Sem margin bottom aqui
     },
     header: {
         flexDirection: 'row',

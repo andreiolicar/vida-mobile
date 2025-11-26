@@ -1,108 +1,31 @@
-import React, { useEffect } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/hooks';
+import { TaskCircleIcon } from '@/components/icons';
 
 interface MindFlowNodeProps {
     title: string;
     status: 'locked' | 'available' | 'in-progress' | 'completed';
-    size?: 'small' | 'medium' | 'large';
     onPress: () => void;
 }
 
-export function MindFlowNode({
-    title,
-    status,
-    size = 'medium',
-    onPress,
-}: MindFlowNodeProps) {
-    const { theme, colors } = useTheme();
-    const breathAnim = new Animated.Value(1);
-
-    useEffect(() => {
-        if (status === 'available' || status === 'in-progress') {
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(breathAnim, {
-                        toValue: 1.05,
-                        duration: 1800,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(breathAnim, {
-                        toValue: 1,
-                        duration: 1800,
-                        useNativeDriver: true,
-                    }),
-                ])
-            ).start();
-        }
-    }, [status]);
-
-    const getNodeConfig = () => {
-        switch (status) {
-            case 'completed':
-                return {
-                    color: theme.success,
-                    icon: 'checkmark-circle' as const,
-                    opacity: 0.8,
-                };
-            case 'in-progress':
-                return {
-                    color: theme.warning,
-                    icon: 'time' as const,
-                    opacity: 1,
-                };
-            case 'available':
-                return {
-                    color: theme.primary,
-                    icon: 'play-circle' as const,
-                    opacity: 1,
-                };
-            default:
-                return {
-                    color: colors.border,
-                    icon: 'lock-closed' as const,
-                    opacity: 0.4,
-                };
-        }
-    };
-
-    // Tamanhos padronizados
-    const nodeSize = 52;
-    const iconSize = 28;
-    const fontSize = 11;
-
-    const { color, icon, opacity } = getNodeConfig();
+export function MindFlowNode({ title, status, onPress }: MindFlowNodeProps) {
+    const { colors } = useTheme();
 
     return (
         <TouchableOpacity
             onPress={onPress}
             disabled={status === 'locked'}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
             style={styles.container}
         >
-            <Animated.View
-                style={[
-                    styles.node,
-                    {
-                        width: nodeSize,
-                        height: nodeSize,
-                        borderRadius: nodeSize / 2,
-                        backgroundColor: color,
-                        opacity,
-                        transform: [{ scale: breathAnim }],
-                    },
-                ]}
-            >
-                <Ionicons name={icon} size={iconSize} color="#ffffff" />
-            </Animated.View>
+            <TaskCircleIcon size={64} status={status} />
 
             <Text
                 style={[
                     styles.label,
                     {
                         color: status === 'locked' ? colors.textSecondary : colors.text,
-                        fontSize,
                     },
                 ]}
                 numberOfLines={2}
@@ -116,18 +39,13 @@ export function MindFlowNode({
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        width: 90, // Largura fixa para alinhamento consistente
-    },
-    node: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8,
-        borderWidth: 3,
-        borderColor: 'rgba(255, 255, 255, 0.3)',
+        width: 90,
     },
     label: {
+        fontSize: 11,
         fontFamily: 'Nunito_600SemiBold',
         textAlign: 'center',
         lineHeight: 15,
+        marginTop: 8,
     },
 });

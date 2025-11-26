@@ -10,12 +10,20 @@ export const colors = {
     error: '#ef4444',
     info: '#3b82f6',
 
-    // Cores dos períodos do dia (rotina)
+    // Cores dos períodos do dia (rotina) - ATUALIZADO para azul/roxo
     periods: {
-        morning: '#fbbf24',    // Amarelo/laranja manhã
-        afternoon: '#f59e0b',  // Laranja tarde
-        evening: '#3b82f6',    // Azul entardecer
-        night: '#6366f1',      // Roxo/azul noite
+        morning: '#60A5FA',    // Azul claro - manhã
+        afternoon: '#3B82F6',  // Azul médio - tarde
+        evening: '#8B5CF6',    // Roxo - noite
+        night: '#7C3AED',      // Roxo escuro - madrugada
+    },
+
+    // Estados das tarefas
+    taskStates: {
+        completed: '#10B981',   // Verde
+        inProgress: '#3B82F6',  // Azul
+        available: '#8B5CF6',   // Roxo
+        locked: '#D1D5DB',      // Cinza
     },
 
     // Tema Light

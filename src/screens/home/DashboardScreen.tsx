@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
+    Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,21 +33,71 @@ export default function DashboardScreen() {
     const [fluxoInfoVisible, setFluxoInfoVisible] = useState(false);
     const [onboardingVisible, setOnboardingVisible] = useState(false);
 
+    // Animações
+    const headerAnim = useRef(new Animated.Value(0)).current;
+    const xpCardAnim = useRef(new Animated.Value(0)).current;
+    const statsAnim = useRef(new Animated.Value(0)).current;
+    const morningAnim = useRef(new Animated.Value(0)).current;
+    const afternoonAnim = useRef(new Animated.Value(0)).current;
+    const eveningAnim = useRef(new Animated.Value(0)).current;
+
     const { user, dailyProgress, mindFlow, insights } = mockDashboardData;
 
     useEffect(() => {
         checkOnboarding();
+        startAnimations();
     }, []);
 
     const checkOnboarding = async () => {
         try {
             const completed = await AsyncStorage.getItem(ONBOARDING_KEY);
             if (!completed) {
-                setOnboardingVisible(true);
+                setTimeout(() => setOnboardingVisible(true), 800);
             }
         } catch (error) {
             console.error('Error checking onboarding:', error);
         }
+    };
+
+    const startAnimations = () => {
+        Animated.sequence([
+            // Header
+            Animated.timing(headerAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+            // Cards
+            Animated.parallel([
+                Animated.timing(xpCardAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(statsAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    delay: 100,
+                    useNativeDriver: true,
+                }),
+            ]),
+            // Fluxo VIDA - sequencial
+            Animated.timing(morningAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+            Animated.timing(afternoonAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+            Animated.timing(eveningAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const handleOnboardingComplete = async () => {
@@ -61,8 +112,24 @@ export default function DashboardScreen() {
     return (
         <>
             <View style={[styles.container, { backgroundColor: colors.background }]}>
-                {/* Header Fixo */}
-                <View style={[styles.header, { backgroundColor: colors.card }]}>
+                {/* Header Fixo com animação */}
+                <Animated.View
+                    style={[
+                        styles.header,
+                        { backgroundColor: colors.card },
+                        {
+                            opacity: headerAnim,
+                            transform: [
+                                {
+                                    translateY: headerAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [-50, 0],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                >
                     <View style={styles.headerContent}>
                         <View>
                             <Text style={[styles.greeting, { color: colors.textSecondary }]}>
@@ -92,24 +159,53 @@ export default function DashboardScreen() {
                             />
                         </View>
                     </View>
-                </View>
+                </Animated.View>
 
                 {/* Conteúdo Scrollável */}
                 <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <View style={styles.content}>
-                        {/* Barra de XP */}
-                        <Card variant="elevated" style={styles.xpCard}>
-                            <XPBar
-                                currentXP={user.currentXP}
-                                maxXP={user.nextLevelXP}
-                                level={user.level}
-                            />
-                        </Card>
+                        {/* Barra de XP com animação */}
+                        <Animated.View
+                            style={{
+                                opacity: xpCardAnim,
+                                transform: [
+                                    {
+                                        translateY: xpCardAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [30, 0],
+                                        }),
+                                    },
+                                ],
+                            }}
+                        >
+                            <Card variant="duolingo" style={styles.xpCard}>
+                                <XPBar
+                                    currentXP={user.currentXP}
+                                    maxXP={user.nextLevelXP}
+                                    level={user.level}
+                                />
+                            </Card>
+                        </Animated.View>
 
-                        {/* Progresso Diário Compacto */}
-                        <View style={styles.statsRow}>
-                            <Card variant="elevated" style={styles.statCard}>
-                                <Text style={[styles.statValue, { color: theme.primary }]}>
+                        {/* Progresso Diário com animação */}
+                        <Animated.View
+                            style={[
+                                styles.statsRow,
+                                {
+                                    opacity: statsAnim,
+                                    transform: [
+                                        {
+                                            translateY: statsAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [30, 0],
+                                            }),
+                                        },
+                                    ],
+                                },
+                            ]}
+                        >
+                            <Card variant="duolingo" style={styles.statCard}>
+                                <Text style={[styles.statValue, { color: colors.text }]}>
                                     {dailyProgress.tasksCompleted}/{dailyProgress.totalTasks}
                                 </Text>
                                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
@@ -117,17 +213,17 @@ export default function DashboardScreen() {
                                 </Text>
                             </Card>
 
-                            <Card variant="elevated" style={styles.statCard}>
-                                <Text style={[styles.statValue, { color: theme.warning }]}>
+                            <Card variant="duolingo" style={styles.statCard}>
+                                <Text style={[styles.statValue, { color: colors.text }]}>
                                     {dailyProgress.focusMinutes}min
                                 </Text>
                                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                                     Focado
                                 </Text>
                             </Card>
-                        </View>
+                        </Animated.View>
 
-                        {/* Título do Fluxo VIDA com ícone info */}
+                        {/* Título do Fluxo VIDA */}
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                 Fluxo VIDA
@@ -144,69 +240,111 @@ export default function DashboardScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        {/* Manhã */}
-                        <View style={styles.periodSection}>
-                            <PeriodHub
-                                period="morning"
-                                label={mindFlow.morning.label}
-                                progress={mindFlow.morning.progress}
-                            />
+                        {/* Manhã com animação */}
+                        <Animated.View
+                            style={{
+                                opacity: morningAnim,
+                                transform: [
+                                    {
+                                        translateY: morningAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [50, 0],
+                                        }),
+                                    },
+                                ],
+                            }}
+                        >
+                            <View style={styles.periodSection}>
+                                <PeriodHub
+                                    period="morning"
+                                    label={mindFlow.morning.label}
+                                    progress={mindFlow.morning.progress}
+                                />
 
-                            <View style={styles.tasksCluster}>
-                                {mindFlow.morning.tasks.map((task) => (
-                                    <MindFlowNode
-                                        key={task.id}
-                                        title={task.title}
-                                        status={task.status as any}
-                                        onPress={() => console.log(task.id)}
-                                    />
-                                ))}
+                                <View style={styles.tasksCluster}>
+                                    {mindFlow.morning.tasks.map((task) => (
+                                        <MindFlowNode
+                                            key={task.id}
+                                            title={task.title}
+                                            status={task.status as any}
+                                            onPress={() => console.log(task.id)}
+                                        />
+                                    ))}
+                                </View>
                             </View>
-                        </View>
+                        </Animated.View>
 
                         <View style={[styles.connector, { backgroundColor: colors.border }]} />
 
-                        {/* Tarde */}
-                        <View style={styles.periodSection}>
-                            <PeriodHub
-                                period="afternoon"
-                                label={mindFlow.afternoon.label}
-                                progress={mindFlow.afternoon.progress}
-                            />
+                        {/* Tarde com animação */}
+                        <Animated.View
+                            style={{
+                                opacity: afternoonAnim,
+                                transform: [
+                                    {
+                                        translateY: afternoonAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [50, 0],
+                                        }),
+                                    },
+                                ],
+                            }}
+                        >
+                            <View style={styles.periodSection}>
+                                <PeriodHub
+                                    period="afternoon"
+                                    label={mindFlow.afternoon.label}
+                                    progress={mindFlow.afternoon.progress}
+                                />
 
-                            <View style={styles.tasksCluster}>
-                                {mindFlow.afternoon.tasks.map((task) => (
-                                    <MindFlowNode
-                                        key={task.id}
-                                        title={task.title}
-                                        status={task.status as any}
-                                        onPress={() => console.log(task.id)}
-                                    />
-                                ))}
+                                <View style={styles.tasksCluster}>
+                                    {mindFlow.afternoon.tasks.map((task) => (
+                                        <MindFlowNode
+                                            key={task.id}
+                                            title={task.title}
+                                            status={task.status as any}
+                                            onPress={() => console.log(task.id)}
+                                        />
+                                    ))}
+                                </View>
                             </View>
-                        </View>
+                        </Animated.View>
 
                         <View style={[styles.connector, { backgroundColor: colors.border }]} />
 
-                        {/* Noite */}
-                        <View style={styles.periodSection}>
-                            <PeriodHub
-                                period="evening"
-                                label={mindFlow.evening.label}
-                                progress={mindFlow.evening.progress}
-                            />
+                        {/* Noite com animação */}
+                        <Animated.View
+                            style={{
+                                opacity: eveningAnim,
+                                transform: [
+                                    {
+                                        translateY: eveningAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [50, 0],
+                                        }),
+                                    },
+                                ],
+                            }}
+                        >
+                            <View style={styles.periodSection}>
+                                <PeriodHub
+                                    period="evening"
+                                    label={mindFlow.evening.label}
+                                    progress={mindFlow.evening.progress}
+                                />
 
-                            <View style={styles.tasksCluster}>
-                                {mindFlow.evening.tasks.map((task) => (
-                                    <MindFlowNode
-                                        key={task.id}
-                                        title={task.title}
-                                        status={task.status as any}
-                                        onPress={() => console.log(task.id)}
-                                    />
-                                ))}
+                                <View style={styles.tasksCluster}>
+                                    {mindFlow.evening.tasks.map((task) => (
+                                        <MindFlowNode
+                                            key={task.id}
+                                            title={task.title}
+                                            status={task.status as any}
+                                            onPress={() => console.log(task.id)}
+                                        />
+                                    ))}
+                                </View>
                             </View>
-                        </View>
+                        </Animated.View>
                     </View>
                 </ScrollView>
             </View>
@@ -244,11 +382,8 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 16,
         paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 4,
+        borderBottomWidth: 2,
+        borderBottomColor: '#E5E7EB',
     },
     headerContent: {
         flexDirection: 'row',
@@ -280,6 +415,7 @@ const styles = StyleSheet.create({
     },
     xpCard: {
         marginBottom: 16,
+        padding: 20, // Padding uniforme
     },
     statsRow: {
         flexDirection: 'row',
@@ -288,7 +424,7 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        padding: 16,
+        padding: 20, // Padding uniforme
         alignItems: 'center',
     },
     statValue: {
