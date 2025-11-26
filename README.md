@@ -83,7 +83,7 @@ A IA atua como co-piloto do usuário, oferecendo:
 ### **Backend**
 
 * Node.js + Express
-* PostgreSQL (Supabase recomendado)
+* PostgreSQL
 * Prisma ORM
 * JWT + Refresh Token
 * Storage para imagens
