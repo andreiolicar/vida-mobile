@@ -7,15 +7,17 @@ interface MindFlowNodeProps {
     title: string;
     status: 'locked' | 'available' | 'in-progress' | 'completed';
     onPress: () => void;
+    onLongPress?: () => void;
 }
 
-export function MindFlowNode({ title, status, onPress }: MindFlowNodeProps) {
+export function MindFlowNode({ title, status, onPress, onLongPress }: MindFlowNodeProps) {
     const { colors } = useTheme();
 
     return (
         <TouchableOpacity
             onPress={onPress}
-            disabled={status === 'locked'}
+            onLongPress={onLongPress}
+            delayLongPress={500}
             activeOpacity={0.7}
             style={styles.container}
         >

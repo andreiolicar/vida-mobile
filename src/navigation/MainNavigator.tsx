@@ -6,11 +6,11 @@ import { useTheme } from '@/hooks';
 
 import DashboardScreen from '@/screens/home/DashboardScreen';
 import ProfileScreen from '@/screens/profile/ProfileScreen';
+import RoutineScreen from '@/screens/routine/RoutineScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Placeholders temporários
-const RoutineScreen = () => null;
 const SocialScreen = () => null;
 
 export default function MainNavigator() {

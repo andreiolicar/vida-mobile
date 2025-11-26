@@ -45,9 +45,9 @@ export function Input({
                 style={[
                     styles.inputContainer,
                     {
-                        backgroundColor: colors.surface,
+                        backgroundColor: colors.card,
                         borderColor: error
-                            ? theme.error
+                            ? '#EF4444'
                             : isFocused
                                 ? theme.primary
                                 : colors.border,
@@ -66,14 +66,23 @@ export function Input({
                 <TextInput
                     style={[
                         styles.input,
-                        { color: colors.text },
+                        { color: colors.text, outlineStyle: 'none' as any },
                         leftIcon && styles.inputWithLeftIcon,
                         (rightIcon || isPassword) && styles.inputWithRightIcon,
                         style,
                     ]}
                     placeholderTextColor={colors.textSecondary}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
+                    selectionColor={theme.primary}
+                    cursorColor={theme.primary}
+                    underlineColorAndroid="transparent"
+                    onFocus={(e) => {
+                        setIsFocused(true);
+                        props.onFocus?.(e);
+                    }}
+                    onBlur={(e) => {
+                        setIsFocused(false);
+                        props.onBlur?.(e);
+                    }}
                     secureTextEntry={showPassword}
                     {...props}
                 />
@@ -106,7 +115,7 @@ export function Input({
             </View>
 
             {error && (
-                <Text style={[styles.error, { color: theme.error }]}>{error}</Text>
+                <Text style={[styles.error, { color: '#EF4444' }]}>{error}</Text>
             )}
         </View>
     );
@@ -130,9 +139,9 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        paddingVertical: 12,
-        fontSize: 16,
-        fontFamily: 'Nunito_400Regular',
+        paddingVertical: 14,
+        fontSize: 15,
+        fontFamily: 'Nunito_500Medium',
     },
     inputWithLeftIcon: {
         paddingLeft: 8,
@@ -149,8 +158,7 @@ const styles = StyleSheet.create({
     },
     error: {
         fontSize: 12,
-        fontFamily: 'Nunito_400Regular',
+        fontFamily: 'Nunito_500Medium',
         marginTop: 4,
-        marginLeft: 4,
     },
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@/hooks';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -9,13 +9,28 @@ interface PeriodHubProps {
     progress: number;
 }
 
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 export function PeriodHub({ period, label, progress }: PeriodHubProps) {
     const { theme, colors } = useTheme();
+    const progressAnim = useRef(new Animated.Value(0)).current;
 
     const periodColor = theme.periods[period];
     const radius = 35;
     const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+    useEffect(() => {
+        Animated.spring(progressAnim, {
+            toValue: progress,
+            damping: 15,
+            useNativeDriver: false,
+        }).start();
+    }, [progress]);
+
+    const strokeDashoffset = progressAnim.interpolate({
+        inputRange: [0, 100],
+        outputRange: [circumference, 0],
+    });
 
     return (
         <View style={styles.container}>
@@ -30,8 +45,8 @@ export function PeriodHub({ period, label, progress }: PeriodHubProps) {
                         strokeWidth={8}
                         fill="none"
                     />
-                    {/* Progress circle */}
-                    <Circle
+                    {/* Progress circle - ANIMADO */}
+                    <AnimatedCircle
                         cx={45}
                         cy={45}
                         r={radius}

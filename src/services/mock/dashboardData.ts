@@ -1,4 +1,56 @@
-export const mockDashboardData = {
+// Tipos para as notificações
+type NotificationType = 'streak' | 'productivity' | 'achievement';
+
+interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  description: string;
+  time: string;
+}
+
+// Tipos para as tarefas
+interface Task {
+  id: string;
+  title: string;
+  status: 'completed' | 'in-progress' | 'available' | 'locked';
+}
+
+// Tipos para os períodos do dia
+interface Period {
+  label: string;
+  progress: number;
+  tasks: Task[];
+}
+
+// Tipo principal do Dashboard
+interface DashboardData {
+  user: {
+    name: string;
+    level: number;
+    currentXP: number;
+    nextLevelXP: number;
+    streak: number;
+    avatar: null;
+  };
+  dailyProgress: {
+    tasksCompleted: number;
+    totalTasks: number;
+    focusMinutes: number;
+    focusGoal: number;
+  };
+  mindFlow: {
+    morning: Period;
+    afternoon: Period;
+    evening: Period;
+  };
+  insights: Notification[];
+}
+
+// Exportar os tipos para usar em outros arquivos se necessário
+export type { Notification, Task, Period, DashboardData, NotificationType };
+
+export const mockDashboardData: DashboardData = {
   user: {
     name: 'João Silva',
     level: 12,
@@ -7,7 +59,7 @@ export const mockDashboardData = {
     streak: 7,
     avatar: null,
   },
-  
+
   dailyProgress: {
     tasksCompleted: 5,
     totalTasks: 9,
@@ -44,18 +96,18 @@ export const mockDashboardData = {
       ],
     },
   },
-  
+
   insights: [
     {
       id: '1',
-      type: 'streak',
+      type: 'streak' as const,
       title: 'Sequência de 7 dias',
       description: 'Continue assim para manter seu progresso',
       time: 'Há 2 horas',
     },
     {
       id: '2',
-      type: 'productivity',
+      type: 'productivity' as const,
       title: 'Você está 20% mais produtivo',
       description: 'Comparado à semana passada',
       time: 'Há 5 horas',

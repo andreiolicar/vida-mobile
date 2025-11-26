@@ -1,4 +1,9 @@
 export { NotificationsModal } from './NotificationsModal';
 export { StreakInfoModal } from './StreakInfoModal';
-export { FluxoInfoModal } from './FluxoInfoModal';
 export { OnboardingModal } from './OnboardingModal';
+export { RoutineInfoModal } from './RoutineInfoModal';
+export { FluxoInfoModal } from './FluxoInfoModal';
+export { AlertModal } from './AlertModal';
+export { TaskFormModal } from './TaskFormModal';
+export { TaskActionsModal } from './TaskActionsModal';
+export { ConfirmDeleteModal } from './ConfirmDeleteModal';
