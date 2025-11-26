@@ -1,21 +1,24 @@
+import React from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import 'nativewind/tailwind.css';
+import { useFonts } from './hooks';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
+  const { fontsLoaded, fontError } = useFonts();
+
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0052e2" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="dark" />
+      <AppNavigator />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
