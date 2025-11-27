@@ -263,14 +263,23 @@ Interfaces semelhantes ao Duolingo:
 - Keystore Android gerada
 - Build APK iniciada (preview profile)
 
+🔐 Autenticação Completa
+- WelcomeScreen com animações
+- LoginScreen funcional com validação de formulário
+- RegisterScreen funcional com validação completa
+- Integração com authStore e userStore
+- Mock de API com delay realista (1.5s)
+- Navegação automática após login/registro
+- Animações suaves em todas as telas
+- KeyboardAvoidingView para melhor UX mobile
+- Validações em tempo real (email, senha, confirmação)
+
 ### O que ainda não foi desenvolvido:
 
-- Welcome screen (OnBoarding antes do registro/login)
-- Tela de Registro (atualmente, apenas um placeholder)
-- Tela de Login (atualmente, apenas um placeholder)
-- OnBoarding com preferências e coleta inicial de dados
+- OnBoarding pós-registro (coleta de preferências, horários, metas)
 - Tela Social (não iniciada)
 - Tela Perfil (não iniciada)
+- Geração de rotina inicial pela IA
 - Persistência de dados (AsyncStorage/Backend)
 - Sistema de gamificação real (XP, níveis, conquistas)
 - Backend/API
