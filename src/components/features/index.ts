@@ -22,3 +22,6 @@ export { ConnectionLine } from './shared';
 
 // Welcome
 export { WelcomeIllustration } from './welcome';
+
+// Onboarding
+export { OnboardingWizard } from './onboarding';

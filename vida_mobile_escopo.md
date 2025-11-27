@@ -198,6 +198,20 @@ Interfaces semelhantes ao Duolingo:
 - Card, Badge, Avatar
 - TaskCircleIcon (4 estados: locked, available, in-progress, completed)
 
+🚀 Onboarding (Wizard Completo)
+
+Fluxo de 4 Etapas:
+- Boas-vindas: Apresentação com ícone animado e cards de funcionalidades.
+- Horários: Configuração de início e fim do dia (Selects funcionais).
+- Metas: Grid interativo com áreas de foco e validação de seleção.
+- Tema: Preview visual (Claro/Escuro) com seleção interativa.
+- Funcionalidades:
+  - Barra de progresso visual (Steps).
+  - Navegação fluida (Voltar/Continuar/Finalizar).
+  - Animações de transição (Fade + Slide).
+  - Integração com authStore.completeOnboarding().
+  - Coleta e validação de dados do usuário.
+
 📱 Navegação
 - Tab Navigator (Home, Rotina, Social, Perfil)
 - Stack Navigator para autenticação
@@ -277,12 +291,12 @@ Interfaces semelhantes ao Duolingo:
 ### O que ainda não foi desenvolvido:
 
 - OnBoarding pós-registro (coleta de preferências, horários, metas)
-- Tela Social (não iniciada)
-- Tela Perfil (não iniciada)
-- Geração de rotina inicial pela IA
-- Persistência de dados (AsyncStorage/Backend)
+- Tela Social (Feed de momento único, Conexões).
+- Tela Perfil (Estatísticas, Histórico).
+- Integração com IA (Geração de rotina inicial baseada nos dados do Onboarding).
+- Persistência de dados (Backend)
 - Sistema de gamificação real (XP, níveis, conquistas)
-- Backend/API
+- Backend/API (Node.js + Supabase).
 
 ---
 
@@ -332,6 +346,9 @@ vida-mobile/
     │   │   │   ├── StreakInfoModal.tsx
     │   │   │   ├── TaskActionsModal.tsx
     │   │   │   └── TaskFormModal.tsx
+    │   │   └── onboarding/
+    │           ├── OnboardingWizard.tsx
+    │           └── index.ts
     │   │   ├── routine/
     │   │   │   ├── index.ts
     │   │   │   └── PeriodFilter.tsx
@@ -344,8 +361,8 @@ vida-mobile/
     │   │       ├── TaskItem.tsx
     │   │       └── TaskNode.tsx
     |   |   └── welcome/
-    │           ├── WelcomeIllustration.tsx
-    │           └── index.ts
+    │   │       ├── WelcomeIllustration.tsx
+    │   │       └── index.ts
     │   ├── icons/
     │   │   ├── index.ts
     │   │   ├── NotificationIcon.tsx
@@ -377,12 +394,15 @@ vida-mobile/
     │   │   └── RegisterScreen.tsx
     │   ├── home/
     │   │   └── DashboardScreen.tsx
+    │   ├── onboarding/
+    │   │   └── OnboardingScreen.tsx
     │   ├── profile/
     │   │   └── ProfileScreen.tsx
     │   └── routine/
     │       └── RoutineScreen.tsx
     |   └── welcome/
-            └── WelcomeScreen.tsx
+    │       └── WelcomeScreen.tsx
+    │
     ├── services/
     │   ├── api/
     │   │   ├── aiApi.ts
