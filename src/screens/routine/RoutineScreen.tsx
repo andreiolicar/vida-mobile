@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks';
 import { MindFlowNode, PeriodHub } from '@/components/features/dashboard';
@@ -240,270 +241,272 @@ export default function RoutineScreen() {
     const completedTasks = tasks.filter((t) => t.status === 'completed').length;
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            {/* Header com animação */}
-            <Animated.View
-                style={[
-                    styles.header,
-                    { backgroundColor: colors.card },
-                    {
-                        opacity: headerAnim,
+        <>
+            <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+                {/* Header com animação */}
+                <Animated.View
+                    style={[
+                        styles.header,
+                        { backgroundColor: colors.card },
+                        {
+                            opacity: headerAnim,
+                            transform: [
+                                {
+                                    translateY: headerAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [-50, 0],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                >
+                    <View style={styles.headerContent}>
+                        <View>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>
+                                Minha Rotina
+                            </Text>
+                            <Text
+                                style={[styles.headerSubtitle, { color: colors.textSecondary }]}
+                            >
+                                {completedTasks} de {totalTasks} concluídas
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.infoButton}
+                            onPress={() => setInfoVisible(true)}
+                        >
+                            <Ionicons
+                                name="information-circle"
+                                size={28}
+                                color={theme.primary}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </Animated.View>
+
+                {/* Filtros com animação */}
+                <Animated.View
+                    style={{
+                        opacity: filterAnim,
                         transform: [
                             {
-                                translateY: headerAnim.interpolate({
+                                translateY: filterAnim.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: [-50, 0],
+                                    outputRange: [20, 0],
                                 }),
                             },
                         ],
-                    },
-                ]}
-            >
-                <View style={styles.headerContent}>
-                    <View>
-                        <Text style={[styles.headerTitle, { color: colors.text }]}>
-                            Minha Rotina
-                        </Text>
-                        <Text
-                            style={[styles.headerSubtitle, { color: colors.textSecondary }]}
-                        >
-                            {completedTasks} de {totalTasks} concluídas
-                        </Text>
-                    </View>
-
-                    <TouchableOpacity
-                        style={styles.infoButton}
-                        onPress={() => setInfoVisible(true)}
-                    >
-                        <Ionicons
-                            name="information-circle"
-                            size={28}
-                            color={theme.primary}
+                    }}
+                >
+                    <View style={styles.filterContainer}>
+                        <PeriodFilter
+                            selected={selectedPeriod}
+                            onSelect={setSelectedPeriod}
                         />
-                    </TouchableOpacity>
-                </View>
-            </Animated.View>
+                    </View>
+                </Animated.View>
 
-            {/* Filtros com animação */}
-            <Animated.View
-                style={{
-                    opacity: filterAnim,
-                    transform: [
-                        {
-                            translateY: filterAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [20, 0],
-                            }),
-                        },
-                    ],
-                }}
-            >
-                <View style={styles.filterContainer}>
-                    <PeriodFilter
-                        selected={selectedPeriod}
-                        onSelect={setSelectedPeriod}
-                    />
-                </View>
-            </Animated.View>
+                <ScrollView
+                    style={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.content}>
+                        {/* Manhã */}
+                        {shouldShowPeriod('morning') && (
+                            <Animated.View
+                                style={{
+                                    opacity: morningAnim,
+                                    transform: [
+                                        {
+                                            translateY: morningAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [50, 0],
+                                            }),
+                                        },
+                                    ],
+                                }}
+                            >
+                                <View style={styles.periodSection}>
+                                    <PeriodHub
+                                        period="morning"
+                                        label="Manhã"
+                                        progress={getPeriodProgress('morning')}
+                                    />
 
-            <ScrollView
-                style={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={styles.content}>
-                    {/* Manhã */}
-                    {shouldShowPeriod('morning') && (
-                        <Animated.View
-                            style={{
-                                opacity: morningAnim,
-                                transform: [
-                                    {
-                                        translateY: morningAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [50, 0],
-                                        }),
-                                    },
-                                ],
-                            }}
-                        >
-                            <View style={styles.periodSection}>
-                                <PeriodHub
-                                    period="morning"
-                                    label="Manhã"
-                                    progress={getPeriodProgress('morning')}
-                                />
+                                    {morningTasks.length > 0 ? (
+                                        <View style={styles.tasksCluster}>
+                                            {morningTasks.map((task) => {
+                                                const anim = getTaskAnim(task.id);
+                                                const isDeleting = deletingTaskId === task.id;
 
-                                {morningTasks.length > 0 ? (
-                                    <View style={styles.tasksCluster}>
-                                        {morningTasks.map((task) => {
-                                            const anim = getTaskAnim(task.id);
-                                            const isDeleting = deletingTaskId === task.id;
+                                                return (
+                                                    <Animated.View
+                                                        key={task.id}
+                                                        style={{
+                                                            opacity: anim,
+                                                            transform: [
+                                                                {
+                                                                    scale: anim.interpolate({
+                                                                        inputRange: [0, 1],
+                                                                        outputRange: [1.5, 1],
+                                                                    }),
+                                                                },
+                                                            ],
+                                                        }}
+                                                    >
+                                                        <MindFlowNode
+                                                            title={task.title}
+                                                            status={getTaskStatus(task)}
+                                                            onPress={() => !isDeleting && handleToggleTask(task.id)}
+                                                            onLongPress={() => !isDeleting && handleLongPress(task)}
+                                                        />
+                                                    </Animated.View>
+                                                );
+                                            })}
+                                        </View>
+                                    ) : (
+                                        <EmptyState message="Nenhuma tarefa para a manhã" />
+                                    )}
+                                </View>
 
-                                            return (
-                                                <Animated.View
-                                                    key={task.id}
-                                                    style={{
-                                                        opacity: anim,
-                                                        transform: [
-                                                            {
-                                                                scale: anim.interpolate({
-                                                                    inputRange: [0, 1],
-                                                                    outputRange: [1.5, 1],
-                                                                }),
-                                                            },
-                                                        ],
-                                                    }}
-                                                >
-                                                    <MindFlowNode
-                                                        title={task.title}
-                                                        status={getTaskStatus(task)}
-                                                        onPress={() => !isDeleting && handleToggleTask(task.id)}
-                                                        onLongPress={() => !isDeleting && handleLongPress(task)}
-                                                    />
-                                                </Animated.View>
-                                            );
-                                        })}
-                                    </View>
-                                ) : (
-                                    <EmptyState message="Nenhuma tarefa para a manhã" />
+                                {selectedPeriod === 'all' && (
+                                    <View
+                                        style={[styles.connector, { backgroundColor: colors.border }]}
+                                    />
                                 )}
-                            </View>
+                            </Animated.View>
+                        )}
 
-                            {selectedPeriod === 'all' && (
-                                <View
-                                    style={[styles.connector, { backgroundColor: colors.border }]}
-                                />
-                            )}
-                        </Animated.View>
-                    )}
+                        {/* Tarde */}
+                        {shouldShowPeriod('afternoon') && (
+                            <Animated.View
+                                style={{
+                                    opacity: afternoonAnim,
+                                    transform: [
+                                        {
+                                            translateY: afternoonAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [50, 0],
+                                            }),
+                                        },
+                                    ],
+                                }}
+                            >
+                                <View style={styles.periodSection}>
+                                    <PeriodHub
+                                        period="afternoon"
+                                        label="Tarde"
+                                        progress={getPeriodProgress('afternoon')}
+                                    />
 
-                    {/* Tarde */}
-                    {shouldShowPeriod('afternoon') && (
-                        <Animated.View
-                            style={{
-                                opacity: afternoonAnim,
-                                transform: [
-                                    {
-                                        translateY: afternoonAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [50, 0],
-                                        }),
-                                    },
-                                ],
-                            }}
-                        >
-                            <View style={styles.periodSection}>
-                                <PeriodHub
-                                    period="afternoon"
-                                    label="Tarde"
-                                    progress={getPeriodProgress('afternoon')}
-                                />
+                                    {afternoonTasks.length > 0 ? (
+                                        <View style={styles.tasksCluster}>
+                                            {afternoonTasks.map((task) => {
+                                                const anim = getTaskAnim(task.id);
+                                                const isDeleting = deletingTaskId === task.id;
 
-                                {afternoonTasks.length > 0 ? (
-                                    <View style={styles.tasksCluster}>
-                                        {afternoonTasks.map((task) => {
-                                            const anim = getTaskAnim(task.id);
-                                            const isDeleting = deletingTaskId === task.id;
+                                                return (
+                                                    <Animated.View
+                                                        key={task.id}
+                                                        style={{
+                                                            opacity: anim,
+                                                            transform: [
+                                                                {
+                                                                    scale: anim.interpolate({
+                                                                        inputRange: [0, 1],
+                                                                        outputRange: [1.5, 1],
+                                                                    }),
+                                                                },
+                                                            ],
+                                                        }}
+                                                    >
+                                                        <MindFlowNode
+                                                            title={task.title}
+                                                            status={getTaskStatus(task)}
+                                                            onPress={() => !isDeleting && handleToggleTask(task.id)}
+                                                            onLongPress={() => !isDeleting && handleLongPress(task)}
+                                                        />
+                                                    </Animated.View>
+                                                );
+                                            })}
+                                        </View>
+                                    ) : (
+                                        <EmptyState message="Nenhuma tarefa para a tarde" />
+                                    )}
+                                </View>
 
-                                            return (
-                                                <Animated.View
-                                                    key={task.id}
-                                                    style={{
-                                                        opacity: anim,
-                                                        transform: [
-                                                            {
-                                                                scale: anim.interpolate({
-                                                                    inputRange: [0, 1],
-                                                                    outputRange: [1.5, 1],
-                                                                }),
-                                                            },
-                                                        ],
-                                                    }}
-                                                >
-                                                    <MindFlowNode
-                                                        title={task.title}
-                                                        status={getTaskStatus(task)}
-                                                        onPress={() => !isDeleting && handleToggleTask(task.id)}
-                                                        onLongPress={() => !isDeleting && handleLongPress(task)}
-                                                    />
-                                                </Animated.View>
-                                            );
-                                        })}
-                                    </View>
-                                ) : (
-                                    <EmptyState message="Nenhuma tarefa para a tarde" />
+                                {selectedPeriod === 'all' && (
+                                    <View
+                                        style={[styles.connector, { backgroundColor: colors.border }]}
+                                    />
                                 )}
-                            </View>
+                            </Animated.View>
+                        )}
 
-                            {selectedPeriod === 'all' && (
-                                <View
-                                    style={[styles.connector, { backgroundColor: colors.border }]}
-                                />
-                            )}
-                        </Animated.View>
-                    )}
+                        {/* Noite */}
+                        {shouldShowPeriod('evening') && (
+                            <Animated.View
+                                style={{
+                                    opacity: eveningAnim,
+                                    transform: [
+                                        {
+                                            translateY: eveningAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [50, 0],
+                                            }),
+                                        },
+                                    ],
+                                }}
+                            >
+                                <View style={styles.periodSection}>
+                                    <PeriodHub
+                                        period="evening"
+                                        label="Noite"
+                                        progress={getPeriodProgress('evening')}
+                                    />
 
-                    {/* Noite */}
-                    {shouldShowPeriod('evening') && (
-                        <Animated.View
-                            style={{
-                                opacity: eveningAnim,
-                                transform: [
-                                    {
-                                        translateY: eveningAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [50, 0],
-                                        }),
-                                    },
-                                ],
-                            }}
-                        >
-                            <View style={styles.periodSection}>
-                                <PeriodHub
-                                    period="evening"
-                                    label="Noite"
-                                    progress={getPeriodProgress('evening')}
-                                />
+                                    {eveningTasks.length > 0 ? (
+                                        <View style={styles.tasksCluster}>
+                                            {eveningTasks.map((task) => {
+                                                const anim = getTaskAnim(task.id);
+                                                const isDeleting = deletingTaskId === task.id;
 
-                                {eveningTasks.length > 0 ? (
-                                    <View style={styles.tasksCluster}>
-                                        {eveningTasks.map((task) => {
-                                            const anim = getTaskAnim(task.id);
-                                            const isDeleting = deletingTaskId === task.id;
-
-                                            return (
-                                                <Animated.View
-                                                    key={task.id}
-                                                    style={{
-                                                        opacity: anim,
-                                                        transform: [
-                                                            {
-                                                                scale: anim.interpolate({
-                                                                    inputRange: [0, 1],
-                                                                    outputRange: [1.5, 1],
-                                                                }),
-                                                            },
-                                                        ],
-                                                    }}
-                                                >
-                                                    <MindFlowNode
-                                                        title={task.title}
-                                                        status={getTaskStatus(task)}
-                                                        onPress={() => !isDeleting && handleToggleTask(task.id)}
-                                                        onLongPress={() => !isDeleting && handleLongPress(task)}
-                                                    />
-                                                </Animated.View>
-                                            );
-                                        })}
-                                    </View>
-                                ) : (
-                                    <EmptyState message="Nenhuma tarefa para a noite" />
-                                )}
-                            </View>
-                        </Animated.View>
-                    )}
-                </View>
-            </ScrollView>
+                                                return (
+                                                    <Animated.View
+                                                        key={task.id}
+                                                        style={{
+                                                            opacity: anim,
+                                                            transform: [
+                                                                {
+                                                                    scale: anim.interpolate({
+                                                                        inputRange: [0, 1],
+                                                                        outputRange: [1.5, 1],
+                                                                    }),
+                                                                },
+                                                            ],
+                                                        }}
+                                                    >
+                                                        <MindFlowNode
+                                                            title={task.title}
+                                                            status={getTaskStatus(task)}
+                                                            onPress={() => !isDeleting && handleToggleTask(task.id)}
+                                                            onLongPress={() => !isDeleting && handleLongPress(task)}
+                                                        />
+                                                    </Animated.View>
+                                                );
+                                            })}
+                                        </View>
+                                    ) : (
+                                        <EmptyState message="Nenhuma tarefa para a noite" />
+                                    )}
+                                </View>
+                            </Animated.View>
+                        )}
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
 
             {/* FAB - Adicionar Tarefa */}
             <Animated.View
@@ -570,7 +573,7 @@ export default function RoutineScreen() {
                 type={alertType || 'locked-period'}
                 onClose={() => setAlertType(null)}
             />
-        </View>
+        </>
     );
 }
 

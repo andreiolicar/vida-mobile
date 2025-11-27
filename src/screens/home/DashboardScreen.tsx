@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@/hooks';
@@ -18,20 +19,28 @@ import {
     MindFlowNode,
     PeriodHub,
     StreakInfoModal,
-    FluxoInfoModal,
     OnboardingModal,
 } from '@/components/features';
+import { RoutineInfoModal, AlertModal } from '@/components/features/modals';
 import { NotificationIcon } from '@/components/icons';
 import { mockDashboardData } from '@/services/mock/dashboardData';
+import { mockTasks, Task } from '@/services/mock/routineData';
+import { isPeriodAvailable } from '@/utils';
 
 const ONBOARDING_KEY = '@vida_onboarding_completed';
 
+type AlertType = 'locked-period' | 'multiple-tasks' | null;
+
 export default function DashboardScreen() {
     const { theme, colors } = useTheme();
+    const [tasks, setTasks] = useState<Task[]>(mockTasks);
     const [notificationsVisible, setNotificationsVisible] = useState(false);
     const [streakInfoVisible, setStreakInfoVisible] = useState(false);
-    const [fluxoInfoVisible, setFluxoInfoVisible] = useState(false);
+    const [routineInfoVisible, setRoutineInfoVisible] = useState(false);
     const [onboardingVisible, setOnboardingVisible] = useState(false);
+    const [alertType, setAlertType] = useState<AlertType>(null);
+
+    const isProcessing = useRef(false);
 
     // Animações
     const headerAnim = useRef(new Animated.Value(0)).current;
@@ -41,7 +50,7 @@ export default function DashboardScreen() {
     const afternoonAnim = useRef(new Animated.Value(0)).current;
     const eveningAnim = useRef(new Animated.Value(0)).current;
 
-    const { user, dailyProgress, mindFlow, insights } = mockDashboardData;
+    const { user, dailyProgress, insights } = mockDashboardData;
 
     useEffect(() => {
         checkOnboarding();
@@ -109,9 +118,92 @@ export default function DashboardScreen() {
         }
     };
 
+    // Funções auxiliares do RoutineScreen
+    const getTasksByPeriod = (period: 'morning' | 'afternoon' | 'evening') => {
+        return tasks.filter((task) => task.period === period);
+    };
+
+    const getPeriodProgress = (period: 'morning' | 'afternoon' | 'evening') => {
+        const periodTasks = getTasksByPeriod(period);
+        if (periodTasks.length === 0) return 0;
+        const completed = periodTasks.filter((t) => t.status === 'completed').length;
+        return Math.round((completed / periodTasks.length) * 100);
+    };
+
+    const hasTaskInProgress = () => {
+        return tasks.some((task) => task.status === 'in-progress');
+    };
+
+    const getTaskStatus = (
+        task: Task
+    ): 'locked' | 'available' | 'in-progress' | 'completed' => {
+        if (!isPeriodAvailable(task.period)) return 'locked';
+        if (task.status === 'completed') return 'completed';
+        if (task.status === 'in-progress') return 'in-progress';
+        return 'available';
+    };
+
+    // Função de toggle igual ao RoutineScreen
+    const handleToggleTask = (taskId: string) => {
+        if (isProcessing.current) return;
+
+        const task = tasks.find((t) => t.id === taskId);
+        if (!task) return;
+
+        if (!isPeriodAvailable(task.period)) {
+            isProcessing.current = true;
+            setAlertType('locked-period');
+
+            setTimeout(() => {
+                isProcessing.current = false;
+            }, 500);
+            return;
+        }
+
+        if (task.status === 'pending') {
+            if (hasTaskInProgress()) {
+                isProcessing.current = true;
+                setAlertType('multiple-tasks');
+
+                setTimeout(() => {
+                    isProcessing.current = false;
+                }, 500);
+                return;
+            }
+
+            setTasks(
+                tasks.map((t) =>
+                    t.id === taskId ? { ...t, status: 'in-progress' as const } : t
+                )
+            );
+            return;
+        }
+
+        if (task.status === 'in-progress') {
+            setTasks(
+                tasks.map((t) =>
+                    t.id === taskId ? { ...t, status: 'completed' as const } : t
+                )
+            );
+            return;
+        }
+
+        if (task.status === 'completed') {
+            setTasks(
+                tasks.map((t) =>
+                    t.id === taskId ? { ...t, status: 'pending' as const } : t
+                )
+            );
+        }
+    };
+
+    const morningTasks = getTasksByPeriod('morning');
+    const afternoonTasks = getTasksByPeriod('afternoon');
+    const eveningTasks = getTasksByPeriod('evening');
+
     return (
         <>
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
                 {/* Header Fixo com animação */}
                 <Animated.View
                     style={[
@@ -223,13 +315,13 @@ export default function DashboardScreen() {
                             </Card>
                         </Animated.View>
 
-                        {/* Título do Fluxo VIDA */}
+                        {/* Título da Rotina */}
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                                Fluxo VIDA
+                                Sua Rotina
                             </Text>
                             <TouchableOpacity
-                                onPress={() => setFluxoInfoVisible(true)}
+                                onPress={() => setRoutineInfoVisible(true)}
                                 style={styles.infoButton}
                             >
                                 <Ionicons
@@ -257,17 +349,17 @@ export default function DashboardScreen() {
                             <View style={styles.periodSection}>
                                 <PeriodHub
                                     period="morning"
-                                    label={mindFlow.morning.label}
-                                    progress={mindFlow.morning.progress}
+                                    label="Manhã"
+                                    progress={getPeriodProgress('morning')}
                                 />
 
                                 <View style={styles.tasksCluster}>
-                                    {mindFlow.morning.tasks.map((task) => (
+                                    {morningTasks.map((task) => (
                                         <MindFlowNode
                                             key={task.id}
                                             title={task.title}
-                                            status={task.status as any}
-                                            onPress={() => console.log(task.id)}
+                                            status={getTaskStatus(task)}
+                                            onPress={() => handleToggleTask(task.id)}
                                         />
                                     ))}
                                 </View>
@@ -293,17 +385,17 @@ export default function DashboardScreen() {
                             <View style={styles.periodSection}>
                                 <PeriodHub
                                     period="afternoon"
-                                    label={mindFlow.afternoon.label}
-                                    progress={mindFlow.afternoon.progress}
+                                    label="Tarde"
+                                    progress={getPeriodProgress('afternoon')}
                                 />
 
                                 <View style={styles.tasksCluster}>
-                                    {mindFlow.afternoon.tasks.map((task) => (
+                                    {afternoonTasks.map((task) => (
                                         <MindFlowNode
                                             key={task.id}
                                             title={task.title}
-                                            status={task.status as any}
-                                            onPress={() => console.log(task.id)}
+                                            status={getTaskStatus(task)}
+                                            onPress={() => handleToggleTask(task.id)}
                                         />
                                     ))}
                                 </View>
@@ -329,17 +421,17 @@ export default function DashboardScreen() {
                             <View style={styles.periodSection}>
                                 <PeriodHub
                                     period="evening"
-                                    label={mindFlow.evening.label}
-                                    progress={mindFlow.evening.progress}
+                                    label="Noite"
+                                    progress={getPeriodProgress('evening')}
                                 />
 
                                 <View style={styles.tasksCluster}>
-                                    {mindFlow.evening.tasks.map((task) => (
+                                    {eveningTasks.map((task) => (
                                         <MindFlowNode
                                             key={task.id}
                                             title={task.title}
-                                            status={task.status as any}
-                                            onPress={() => console.log(task.id)}
+                                            status={getTaskStatus(task)}
+                                            onPress={() => handleToggleTask(task.id)}
                                         />
                                     ))}
                                 </View>
@@ -347,7 +439,7 @@ export default function DashboardScreen() {
                         </Animated.View>
                     </View>
                 </ScrollView>
-            </View>
+            </SafeAreaView>
 
             <NotificationsModal
                 visible={notificationsVisible}
@@ -361,14 +453,21 @@ export default function DashboardScreen() {
                 onClose={() => setStreakInfoVisible(false)}
             />
 
-            <FluxoInfoModal
-                visible={fluxoInfoVisible}
-                onClose={() => setFluxoInfoVisible(false)}
+            <RoutineInfoModal
+                visible={routineInfoVisible}
+                onClose={() => setRoutineInfoVisible(false)}
             />
 
             <OnboardingModal
                 visible={onboardingVisible}
                 onComplete={handleOnboardingComplete}
+            />
+
+            {/* Modal de Alertas (período bloqueado / múltiplas tarefas) */}
+            <AlertModal
+                visible={alertType !== null}
+                type={alertType || 'locked-period'}
+                onClose={() => setAlertType(null)}
             />
         </>
     );
@@ -415,7 +514,7 @@ const styles = StyleSheet.create({
     },
     xpCard: {
         marginBottom: 16,
-        padding: 20, // Padding uniforme
+        padding: 20,
     },
     statsRow: {
         flexDirection: 'row',
@@ -424,7 +523,7 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        padding: 20, // Padding uniforme
+        padding: 20,
         alignItems: 'center',
     },
     statValue: {
