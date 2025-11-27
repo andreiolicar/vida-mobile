@@ -13,12 +13,14 @@ interface AuthState {
     logout: () => void;
     completeOnboarding: () => void;
     setTokens: (accessToken: string, refreshToken: string) => void;
+    setAuthenticated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
-            isAuthenticated: true,
+            // ⚠️ IMPORTANTE: Estado inicial NÃO autenticado
+            isAuthenticated: false,
             hasCompletedOnboarding: false,
             accessToken: null,
             refreshToken: null,
@@ -42,6 +44,10 @@ export const useAuthStore = create<AuthState>()(
 
             setTokens: (accessToken, refreshToken) =>
                 set({ accessToken, refreshToken }),
+
+            // Setter manual para testes
+            setAuthenticated: (value) =>
+                set({ isAuthenticated: value }),
         }),
         {
             name: 'vida-auth-storage',

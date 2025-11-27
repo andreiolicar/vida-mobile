@@ -2,6 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 // Auth Stack
 export type AuthStackParamList = {
+    Welcome: undefined;
     Login: undefined;
     Register: undefined;
     ForgotPassword: undefined;
@@ -9,7 +10,6 @@ export type AuthStackParamList = {
 
 // Onboarding Stack
 export type OnboardingStackParamList = {
-    Welcome: undefined;
     Preferences: undefined;
     RoutineSetup: undefined;
     ThemeSelection: undefined;
