@@ -23,11 +23,20 @@ export type MainTabParamList = {
     Profile: undefined;
 };
 
+// Profile Stack (Settings e Help)
+export type ProfileStackParamList = {
+    ProfileMain: undefined;
+    Settings: undefined;
+    Help: undefined;
+    Achievements: undefined;
+};
+
 // Root Navigator
 export type RootStackParamList = {
     Auth: NavigatorScreenParams<AuthStackParamList>;
     Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
     Main: NavigatorScreenParams<MainTabParamList>;
+    ProfileStack: NavigatorScreenParams<ProfileStackParamList>;
 };
 
 declare global {

@@ -5,12 +5,12 @@ import { MainTabParamList } from './types';
 import { useTheme } from '@/hooks';
 
 import DashboardScreen from '@/screens/home/DashboardScreen';
-import ProfileScreen from '@/screens/profile/ProfileScreen';
 import RoutineScreen from '@/screens/routine/RoutineScreen';
+import ProfileNavigator from './ProfileNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Placeholders temporários
+// Placeholder temporário
 const SocialScreen = () => null;
 
 export default function MainNavigator() {
@@ -60,7 +60,7 @@ export default function MainNavigator() {
             />
             <Tab.Screen
                 name="Profile"
-                component={ProfileScreen}
+                component={ProfileNavigator}
                 options={{
                     tabBarLabel: 'Perfil',
                     tabBarIcon: ({ color, size }) => (
