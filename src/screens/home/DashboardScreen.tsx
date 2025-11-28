@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@/hooks';
 import { Card } from '@/components/ui';
 import {
@@ -19,15 +18,12 @@ import {
     MindFlowNode,
     PeriodHub,
     StreakInfoModal,
-    OnboardingModal,
 } from '@/components/features';
 import { RoutineInfoModal, AlertModal } from '@/components/features/modals';
 import { NotificationIcon } from '@/components/icons';
 import { mockDashboardData } from '@/services/mock/dashboardData';
 import { mockTasks, Task } from '@/services/mock/routineData';
 import { isPeriodAvailable } from '@/utils';
-
-const ONBOARDING_KEY = '@vida_onboarding_completed';
 
 type AlertType = 'locked-period' | 'multiple-tasks' | null;
 
@@ -37,7 +33,6 @@ export default function DashboardScreen() {
     const [notificationsVisible, setNotificationsVisible] = useState(false);
     const [streakInfoVisible, setStreakInfoVisible] = useState(false);
     const [routineInfoVisible, setRoutineInfoVisible] = useState(false);
-    const [onboardingVisible, setOnboardingVisible] = useState(false);
     const [alertType, setAlertType] = useState<AlertType>(null);
 
     const isProcessing = useRef(false);
@@ -53,20 +48,8 @@ export default function DashboardScreen() {
     const { user, dailyProgress, insights } = mockDashboardData;
 
     useEffect(() => {
-        checkOnboarding();
         startAnimations();
     }, []);
-
-    const checkOnboarding = async () => {
-        try {
-            const completed = await AsyncStorage.getItem(ONBOARDING_KEY);
-            if (!completed) {
-                setTimeout(() => setOnboardingVisible(true), 800);
-            }
-        } catch (error) {
-            console.error('Error checking onboarding:', error);
-        }
-    };
 
     const startAnimations = () => {
         Animated.sequence([
@@ -107,15 +90,6 @@ export default function DashboardScreen() {
                 useNativeDriver: true,
             }),
         ]).start();
-    };
-
-    const handleOnboardingComplete = async () => {
-        try {
-            await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-            setOnboardingVisible(false);
-        } catch (error) {
-            console.error('Error saving onboarding:', error);
-        }
     };
 
     // Funções auxiliares do RoutineScreen
@@ -456,11 +430,6 @@ export default function DashboardScreen() {
             <RoutineInfoModal
                 visible={routineInfoVisible}
                 onClose={() => setRoutineInfoVisible(false)}
-            />
-
-            <OnboardingModal
-                visible={onboardingVisible}
-                onComplete={handleOnboardingComplete}
             />
 
             {/* Modal de Alertas (período bloqueado / múltiplas tarefas) */}

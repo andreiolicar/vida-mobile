@@ -45,10 +45,12 @@ Criar um ambiente digital que ajude o usuário a viver uma vida mais equilibrada
 
 ### 4.1 Onboarding
 - O usuário cria conta ou faz login.
-- Preferências iniciais são definidas.
-- O app coleta informações sobre rotina, horários, metas e desafios.
-- A IA gera uma primeira versão da rotina sugerida.
-- O usuário escolhe tema (light/dark).
+- Wizard de 3 etapas coleta preferências:
+  - Boas-vindas: Apresentação do app e funcionalidades principais
+  - Tarefas Diárias: Seleção de atividades com período do dia (Manhã/Tarde/Noite)
+  - Tema: Escolha entre modo Claro ou Escuro
+- Simulação de geração de rotina com IA (loading animado com 3 mensagens)
+- Navegação automática para o Dashboard após conclusão
 
 ### 4.2 Home (Dashboard)
 Exibe:
@@ -180,104 +182,116 @@ Interfaces semelhantes ao Duolingo:
 
 ### O que foi desenvolvido:
 
-🎯 Projeto Inicial
+🎯 **Projeto Inicial**
 - Criado projeto Expo com React Native + TypeScript
 - Configurado estrutura de pastas completa (src/, components/, screens/, etc)
 - Instalado dependências: React Navigation, Ionicons, Nunito fonts
 
-🎨 Design System
+🎨 **Design System**
 - Sistema de temas (Light/Dark mode)
 - Paleta de cores (primary, success, warning, error)
 - Hook useTheme() para acesso global
 - Fontes Nunito (400, 500, 600, 700, 800)
 
-🧩 Componentes UI Base
+🧩 **Componentes UI Base**
 - Button (variants: primary, secondary, outline)
-- Input (com ícones, password toggle, focus correto, sem outline preto)
+- Input (com ícones, password toggle, focus correto)
 - Select (dropdown modal funcional com ícones coloridos)
 - Card, Badge, Avatar
 - TaskCircleIcon (4 estados: locked, available, in-progress, completed)
 
-🚀 Onboarding (Wizard Completo)
+🚀 **Onboarding (Wizard Completo - 3 Etapas)**
 
-Fluxo de 4 Etapas:
-- Boas-vindas: Apresentação com ícone animado e cards de funcionalidades.
-- Horários: Configuração de início e fim do dia (Selects funcionais).
-- Metas: Grid interativo com áreas de foco e validação de seleção.
-- Tema: Preview visual (Claro/Escuro) com seleção interativa.
-- Funcionalidades:
-  - Barra de progresso visual (Steps).
-  - Navegação fluida (Voltar/Continuar/Finalizar).
-  - Animações de transição (Fade + Slide).
-  - Integração com authStore.completeOnboarding().
-  - Coleta e validação de dados do usuário.
+**Fluxo:**
+1. **Boas-vindas**: Apresentação com ícone animado e 3 cards de funcionalidades (Rotina Personalizada, Assistente IA, Gamificação)
+2. **Tarefas Diárias**: Seleção de 8 atividades práticas com escolha de período:
+   - Praticar Exercícios, Estudar, Meditar, Ler, Trabalhar em Projetos, Organizar Ambiente, Cozinhar, Conversar com Amigos
+   - Cada tarefa permite selecionar: Manhã, Tarde ou Noite
+   - Expansão/colapso animado do seletor de períodos
+3. **Tema**: Preview visual (Claro/Escuro) com seleção interativa
 
-📱 Navegação
+**Funcionalidades:**
+- Barra de progresso visual (1 de 3, 2 de 3, 3 de 3)
+- Navegação fluida com animações (Voltar/Continuar/Finalizar)
+- Fade in/out suaves entre etapas (sem flash inicial)
+- Transições com fade + slide (200ms saída + 400ms entrada)
+- Validação: mínimo 1 tarefa selecionada
+- **Loading de geração de rotina:**
+  - "Analisando seus objetivos..." (1.5s)
+  - "Gerando rotina ideal..." (2s)
+  - "Rotina criada com sucesso!" (3s)
+  - Ícone de sucesso com animação bounce + spring
+  - Card informativo com fade + slide up (delay 300ms)
+- Integração com authStore.completeOnboarding()
+- Coleta de dados: tarefas selecionadas, períodos e tema
+
+📱 **Navegação**
 - Tab Navigator (Home, Rotina, Social, Perfil)
-- Stack Navigator para autenticação
-- Estrutura MainNavigator + AuthNavigator + AppNavigator
+- Stack Navigator para autenticação (Welcome, Login, Register)
+- Stack Navigator para Onboarding
+- Estrutura: MainNavigator + AuthNavigator + AppNavigator
+- Fluxo: Auth → Onboarding (se não completado) → Main
 
-🏠 DashboardScreen (Home)
-- Header com avatar, streak e notificações
+🏠 **DashboardScreen (Home)**
+- Header fixo com avatar, streak e notificações
 - XP Bar animada com nível e progresso
-- 3 Stats Cards (Dias, Conquistas, Tarefas)
-- Título "Sua Rotina" com animação (slide + fade)
-- Botão info animado (scale + fade)
+- 2 Stats Cards (Tarefas Concluídas, Tempo Focado)
+- Título "Sua Rotina" com botão de informação
 - Exibição de tarefas por período (Manhã/Tarde/Noite)
-- PeriodHub com progresso circular
-- MindFlowNodes clicáveis
-- Toggle de status de tarefas
-- Sistema de bloqueio por horário
-- Alertas (locked-period, multiple-tasks)
-- Modal informativo (RoutineInfoModal)
-- Animações sequenciais de entrada
+- PeriodHub com progresso circular por período
+- MindFlowNodes clicáveis para toggle de status
+- Sistema de bloqueio por período (futuro = locked)
+- Alertas: período bloqueado, múltiplas tarefas em progresso
+- Animações sequenciais de entrada (header → cards → períodos)
 
-📅 RoutineScreen (Rotinas)
-- CRUD Completo de Tarefas:
-  - Criar tarefa (modal com formulário completo)
-  - Editar tarefa (long press 500ms → menu)
+📅 **RoutineScreen (Rotinas)**
+- **CRUD Completo de Tarefas:**
+  - Criar tarefa (modal com formulário: título, período, prioridade)
+  - Editar tarefa (long press 500ms → menu de ações)
   - Excluir tarefa (confirmação + animação de bolha estourando)
   - Toggle de status (pendente → em progresso → concluída)
-- Sistema de Bloqueio:
-  - Tarefas futuras aparecem cinzas/locked
+- **Sistema de Bloqueio:**
+  - Tarefas de períodos futuros aparecem locked/cinzas
   - Apenas 1 tarefa em progresso por vez
   - Validação de horário por período
-- Filtros: Tudo, Manhã, Tarde, Noite
+- **Filtros:** Tudo, Manhã, Tarde, Noite
 - PeriodHub com progresso por período
 - Contador de tarefas concluídas no header
-- FAB para adicionar tarefas
+- FAB (Floating Action Button) para adicionar tarefas
 - Animação de bolha ao deletar (scale 1.5 + fade out)
 
-🎭 Modais
+🎭 **Modais**
 - TaskFormModal (criar/editar com validação)
 - TaskActionsModal (menu: editar/deletar)
 - ConfirmDeleteModal (confirmação de exclusão)
 - AlertModal (período bloqueado, múltiplas tarefas)
 - RoutineInfoModal (como usar a rotina)
-- NotificationsModal (lista de notificações)
-- StreakInfoModal (info sobre sequência)
-- OnboardingModal (tutorial inicial)
+- NotificationsModal (lista de insights/notificações)
+- StreakInfoModal (informações sobre sequência de dias)
 
-🛠️ Utilitários
-- isPeriodAvailable() - verifica horário disponível
-- getCurrentPeriod() - retorna período atual
-- Validações de formulário
-- Mock data (12 tarefas distribuídas)
+🛠️ **Utilitários**
+- isPeriodAvailable() - verifica se período está disponível
+- getCurrentPeriod() - retorna período atual do dia
+- Validações de formulário (título, email, senha)
+- Mock data (12 tarefas distribuídas por período)
 
-🎬 Animações
+🎬 **Animações**
 - Entrada sequencial de componentes (fade + slide)
+- Transições suaves entre telas (200ms + 400ms)
+- Expansão/colapso de seletores (spring + timing)
 - Animação de bolha ao deletar tarefas
-- Transições de navegação
-- Feedback visual em interações
+- Feedback visual em todas as interações
+- Loading animado com mensagens sequenciais
+- Sucesso com bounce + spring (ícone) + fade up (card)
 
-📦 Build
+📦 **Build**
 - EAS Build configurado
 - Conta Expo criada (@vidamobile)
 - Application ID: com.vidamobile.vida
 - Keystore Android gerada
-- Build APK iniciada (preview profile)
+- Build APK configurada (preview profile)
 
-🔐 Autenticação Completa
+🔐 **Autenticação Completa**
 - WelcomeScreen com animações
 - LoginScreen funcional com validação de formulário
 - RegisterScreen funcional com validação completa
@@ -290,13 +304,14 @@ Fluxo de 4 Etapas:
 
 ### O que ainda não foi desenvolvido:
 
-- OnBoarding pós-registro (coleta de preferências, horários, metas)
-- Tela Social (Feed de momento único, Conexões).
-- Tela Perfil (Estatísticas, Histórico).
-- Integração com IA (Geração de rotina inicial baseada nos dados do Onboarding).
-- Persistência de dados (Backend)
-- Sistema de gamificação real (XP, níveis, conquistas)
-- Backend/API (Node.js + Supabase).
+- Tela Social (Feed de momento único, Conexões via NFC/QR)
+- Tela Perfil (Estatísticas detalhadas, Histórico, Conquistas)
+- Integração real com IA Gemini (geração de rotina baseada nos dados)
+- Persistência de dados (Backend com Supabase)
+- Sistema de gamificação completo (XP real, níveis, conquistas desbloqueáveis)
+- Sistema de lembretes com push notifications
+- Backend/API (Node.js + Express + PostgreSQL)
+- Sincronização entre dispositivos
 
 ---
 
@@ -341,7 +356,6 @@ vida-mobile/
     │   │   │   ├── FluxoInfoModal.tsx
     │   │   │   ├── index.ts
     │   │   │   ├── NotificationsModal.tsx
-    │   │   │   ├── OnboardingModal.tsx
     │   │   │   ├── RoutineInfoModal.tsx
     │   │   │   ├── StreakInfoModal.tsx
     │   │   │   ├── TaskActionsModal.tsx

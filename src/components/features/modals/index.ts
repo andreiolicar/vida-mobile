@@ -1,6 +1,5 @@
 export { NotificationsModal } from './NotificationsModal';
 export { StreakInfoModal } from './StreakInfoModal';
-export { OnboardingModal } from './OnboardingModal';
 export { RoutineInfoModal } from './RoutineInfoModal';
 export { FluxoInfoModal } from './FluxoInfoModal';
 export { AlertModal } from './AlertModal';
