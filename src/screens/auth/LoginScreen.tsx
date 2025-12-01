@@ -8,33 +8,26 @@ import {
     Platform,
     ScrollView,
     Animated,
-    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks';
 import { Button, Input } from '@/components/ui';
 import { useAuthStore, useUserStore } from '@/store';
-import { AuthStackParamList } from '@/navigation/types';
-
-type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
+import { loginUser } from '@/services/api/authApi';
+import { mockDashboardData } from '@/services/mock/dashboardData';
 
 export default function LoginScreen() {
     const { colors, theme } = useTheme();
-    const navigation = useNavigation<LoginScreenNavigationProp>();
+    const navigation = useNavigation();
     const { login } = useAuthStore();
     const { setUser } = useUserStore();
 
-    // Estados do formulário
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState({
-        email: '',
-        password: '',
-    });
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     // Animações
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -55,95 +48,82 @@ export default function LoginScreen() {
         ]).start();
     }, []);
 
-    // Validação
-    const validateForm = (): boolean => {
-        const newErrors = { email: '', password: '' };
-        let isValid = true;
-
-        // Validar email
+    const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email) {
-            newErrors.email = 'Email é obrigatório';
-            isValid = false;
-        } else if (!emailRegex.test(email)) {
-            newErrors.email = 'Email inválido';
-            isValid = false;
+            setEmailError('Email é obrigatório');
+            return false;
         }
-
-        // Validar senha
-        if (!password) {
-            newErrors.password = 'Senha é obrigatória';
-            isValid = false;
-        } else if (password.length < 6) {
-            newErrors.password = 'Senha deve ter no mínimo 6 caracteres';
-            isValid = false;
+        if (!emailRegex.test(email)) {
+            setEmailError('Email inválido');
+            return false;
         }
-
-        setErrors(newErrors);
-        return isValid;
+        setEmailError('');
+        return true;
     };
 
-    // Handler de login
-    const handleLogin = async () => {
-        if (!validateForm()) return;
+    const validatePassword = (password: string) => {
+        if (!password) {
+            setPasswordError('Senha é obrigatória');
+            return false;
+        }
+        if (password.length < 6) {
+            setPasswordError('Senha deve ter pelo menos 6 caracteres');
+            return false;
+        }
+        setPasswordError('');
+        return true;
+    };
 
-        setLoading(true);
+    const handleLogin = async () => {
+        const isEmailValid = validateEmail(email);
+        const isPasswordValid = validatePassword(password);
+
+        if (!isEmailValid || !isPasswordValid) {
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
-            // Mock de login - simula delay de API
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            // Mock de API
+            const response = await loginUser(email, password);
 
-            // Mock: aceita qualquer email/senha para testes
-            const mockAccessToken = 'mock-access-token-' + Date.now();
-            const mockRefreshToken = 'mock-refresh-token-' + Date.now();
+            console.log('✅ Login bem-sucedido');
 
-            // Atualiza store de autenticação
-            login(mockAccessToken, mockRefreshToken);
-
-            // Atualiza store de usuário
-            setUser({
-                id: '1',
-                name: email.split('@')[0], // Pega nome do email
-                email,
-                level: 1,
-                currentXP: 0,
-                nextLevelXP: 100,
+            // ✅ Popular userStore com streak inicial = 1
+            const mockUser = {
+                id: response.user.id,
+                name: response.user.name,
+                email: response.user.email,
+                avatar: undefined,
+                level: mockDashboardData.user.level, // 12
+                currentXP: mockDashboardData.user.currentXP, // 450
+                nextLevelXP: mockDashboardData.user.nextLevelXP, // 600
                 dailyXP: 0,
-                totalXP: 0,
-                streak: 0,
-            });
+                totalXP: mockDashboardData.user.currentXP, // 450
+                streak: 1, // ✅ STREAK COMEÇA EM 1
+            };
 
-            // Sucesso! Navegação automática pelo AppNavigator
+            console.log('📊 Populando userStore com:', mockUser);
+
+            // Salvar no userStore
+            setUser(mockUser);
+
+            // Salvar tokens no authStore
+            login(response.accessToken, response.refreshToken);
+
+            console.log('🚀 Login concluído, navegando...');
         } catch (error) {
-            console.error('Login error:', error);
-            Alert.alert(
-                'Erro no login',
-                'Não foi possível fazer login. Tente novamente.'
-            );
+            console.error('❌ Erro no login:', error);
+            setPasswordError('Email ou senha incorretos');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
-    };
-
-    const handleGoBack = () => {
-        navigation.goBack();
-    };
-
-    const handleForgotPassword = () => {
-        Alert.alert(
-            'Recuperar senha',
-            'Funcionalidade em desenvolvimento. Por enquanto, use qualquer email/senha para testes.'
-        );
-    };
-
-    const handleGoToRegister = () => {
-        navigation.navigate('Register');
     };
 
     return (
-        <SafeAreaView
-            style={[styles.container, { backgroundColor: colors.background }]}
-        >
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -162,76 +142,51 @@ export default function LoginScreen() {
                             },
                         ]}
                     >
-                        {/* Header com botão voltar */}
+                        {/* Header */}
                         <View style={styles.header}>
-                            <TouchableOpacity
-                                onPress={handleGoBack}
-                                style={styles.backButton}
-                            >
-                                <Ionicons
-                                    name="arrow-back"
-                                    size={24}
-                                    color={colors.text}
-                                />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Logo/Brand */}
-                        <View style={styles.brandContainer}>
-                            <View
-                                style={[
-                                    styles.brandCircle,
-                                    { backgroundColor: `${theme.primary}15` },
-                                ]}
-                            >
-                                <Text style={[styles.brandText, { color: theme.primary }]}>
-                                    V
-                                </Text>
-                            </View>
-                        </View>
-
-                        {/* Título */}
-                        <View style={styles.titleContainer}>
                             <Text style={[styles.title, { color: colors.text }]}>
                                 Bem-vindo de volta!
                             </Text>
                             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                                Entre para continuar sua jornada
+                                Faça login para continuar
                             </Text>
                         </View>
 
-                        {/* Formulário */}
+                        {/* Form */}
                         <View style={styles.form}>
                             <Input
                                 label="Email"
                                 placeholder="seu@email.com"
                                 value={email}
-                                onChangeText={setEmail}
-                                error={errors.email}
+                                onChangeText={(text) => {
+                                    setEmail(text);
+                                    if (emailError) validateEmail(text);
+                                }}
+                                onBlur={() => validateEmail(email)}
+                                error={emailError}
+                                leftIcon="mail"
                                 keyboardType="email-address"
                                 autoCapitalize="none"
-                                autoComplete="email"
-                                leftIcon="mail"
+                                autoCorrect={false}
                             />
 
                             <Input
                                 label="Senha"
-                                placeholder="••••••••"
+                                placeholder="Sua senha"
                                 value={password}
-                                onChangeText={setPassword}
-                                error={errors.password}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                autoComplete="password"
+                                onChangeText={(text) => {
+                                    setPassword(text);
+                                    if (passwordError) validatePassword(text);
+                                }}
+                                onBlur={() => validatePassword(password)}
+                                error={passwordError}
                                 leftIcon="lock-closed"
+                                secureTextEntry
                             />
 
-                            <TouchableOpacity
-                                onPress={handleForgotPassword}
-                                style={styles.forgotButton}
-                            >
-                                <Text style={[styles.forgotText, { color: theme.primary }]}>
-                                    Esqueci minha senha
+                            <TouchableOpacity style={styles.forgotPassword}>
+                                <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>
+                                    Esqueceu a senha?
                                 </Text>
                             </TouchableOpacity>
 
@@ -239,30 +194,22 @@ export default function LoginScreen() {
                                 variant="primary"
                                 size="lg"
                                 onPress={handleLogin}
-                                loading={loading}
-                                disabled={loading}
+                                loading={isLoading}
                                 style={styles.loginButton}
                             >
                                 Entrar
                             </Button>
                         </View>
 
-                        {/* Divider */}
-                        <View style={styles.divider}>
-                            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-                            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>
-                                ou
-                            </Text>
-                            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-                        </View>
-
-                        {/* Link para registro */}
-                        <View style={styles.registerContainer}>
-                            <Text style={[styles.registerText, { color: colors.textSecondary }]}>
+                        {/* Footer */}
+                        <View style={styles.footer}>
+                            <Text style={[styles.footerText, { color: colors.textSecondary }]}>
                                 Não tem uma conta?{' '}
                             </Text>
-                            <TouchableOpacity onPress={handleGoToRegister}>
-                                <Text style={[styles.registerLink, { color: theme.primary }]}>
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('Register' as never)}
+                            >
+                                <Text style={[styles.footerLink, { color: theme.primary }]}>
                                     Cadastre-se
                                 </Text>
                             </TouchableOpacity>
@@ -287,86 +234,49 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         paddingHorizontal: 24,
-        paddingTop: 8,
-        paddingBottom: 32,
+        paddingTop: 40,
+        paddingBottom: 24,
+        justifyContent: 'center',
     },
     header: {
-        marginBottom: 24,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
+        marginBottom: 40,
         alignItems: 'center',
-    },
-    brandContainer: {
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    brandCircle: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    brandText: {
-        fontSize: 40,
-        fontFamily: 'Nunito_800ExtraBold',
-    },
-    titleContainer: {
-        marginBottom: 32,
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontFamily: 'Nunito_800ExtraBold',
-        textAlign: 'center',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
-        fontFamily: 'Nunito_500Medium',
+        fontFamily: 'Nunito_400Regular',
         textAlign: 'center',
     },
     form: {
-        marginBottom: 24,
+        marginBottom: 32,
     },
-    forgotButton: {
+    forgotPassword: {
         alignSelf: 'flex-end',
         marginTop: -8,
         marginBottom: 24,
     },
-    forgotText: {
+    forgotPasswordText: {
         fontSize: 14,
         fontFamily: 'Nunito_600SemiBold',
     },
     loginButton: {
-        width: '100%',
+        marginTop: 8,
     },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-    },
-    dividerText: {
-        marginHorizontal: 16,
-        fontSize: 14,
-        fontFamily: 'Nunito_500Medium',
-    },
-    registerContainer: {
+    footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    registerText: {
+    footerText: {
         fontSize: 14,
-        fontFamily: 'Nunito_500Medium',
+        fontFamily: 'Nunito_400Regular',
     },
-    registerLink: {
+    footerLink: {
         fontSize: 14,
         fontFamily: 'Nunito_700Bold',
     },

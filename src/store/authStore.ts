@@ -32,12 +32,37 @@ export const useAuthStore = create<AuthState>()(
                     refreshToken,
                 }),
 
-            logout: () =>
+            logout: () => {
+                console.log('🚪 Iniciando logout...');
+
+                // ✅ SOLUÇÃO: Limpar userStore dinamicamente
+                import('./userStore').then(({ useUserStore }) => {
+                    console.log('🧹 Limpando userStore...');
+                    useUserStore.getState().clearUser();
+                });
+
+                // Limpar todo o estado de autenticação
                 set({
                     isAuthenticated: false,
+                    hasCompletedOnboarding: false, // Reset onboarding
                     accessToken: null,
                     refreshToken: null,
-                }),
+                });
+
+                // Limpar AsyncStorage manualmente (garantia extra)
+                AsyncStorage.multiRemove([
+                    'vida-user-storage',
+                    'vida-auth-storage',
+                ])
+                    .then(() => {
+                        console.log('✅ AsyncStorage limpo com sucesso');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Erro ao limpar AsyncStorage:', error);
+                    });
+
+                console.log('✅ Logout concluído');
+            },
 
             completeOnboarding: () =>
                 set({ hasCompletedOnboarding: true }),

@@ -296,16 +296,141 @@ Interfaces semelhantes ao Duolingo:
 - LoginScreen funcional com validação de formulário
 - RegisterScreen funcional com validação completa
 - Integração com authStore e userStore
-- Mock de API com delay realista (1.5s)
+- **Mock API completo (authApi.ts):**
+  - loginUser() - simula login com delay realista (1.5s)
+  - registerUser() - simula cadastro de novos usuários
+  - logoutUser() - simula logout
+  - Retorna tokens mock e dados do usuário
+- **Sistema de inicialização de dados:**
+  - Login: usuário recebe level 12, XP 450, streak inicial = 1
+  - Registro: novo usuário começa com level 1, XP 0, streak inicial = 1
+- **Logout completo:**
+  - authStore.logout() limpa tokens e reseta onboarding
+  - Limpeza automática do userStore
+  - Remoção de dados do AsyncStorage
+  - Navegação automática para WelcomeScreen
 - Navegação automática após login/registro
 - Animações suaves em todas as telas
 - KeyboardAvoidingView para melhor UX mobile
 - Validações em tempo real (email, senha, confirmação)
+- Console logs detalhados para debug
+
+👤 **ProfileScreen (Perfil Completo)**
+- **Header personalizado:**
+  - Avatar grande (96px) com badge de streak clicável
+  - Nome e email do usuário
+  - StreakInfoModal ao clicar no badge de sequência
+- **Card de Nível + XP:**
+  - Badge com troféu + "Nível X"
+  - XP atual / XP necessário para próximo nível
+  - Barra de progresso visual animada
+  - Porcentagem para próximo nível
+- **Conquistas (Grid 2x3):**
+  - Exibe 6 conquistas principais
+  - Badge mostra progresso (ex: 3/8 desbloqueadas)
+  - Botão "Ver todas" → navega para AchievementsScreen
+  - Cards com ícones coloridos
+  - Progresso visual para conquistas bloqueadas
+  - Badge de check verde para conquistas desbloqueadas
+- **Navegação em Stack:**
+  - ProfileNavigator gerencia navegação interna
+  - ProfileMain → Settings/Help/Achievements
+- **Ações principais:**
+  - Configurações → SettingsScreen
+  - Ajuda e Suporte → HelpScreen
+  - Sair da conta → Logout com confirmação
+- **Animações:**
+  - Fade in sequencial (header → conquistas)
+  - Slide up suave
+  - Transições entre seções
+  
+🏆 **AchievementsScreen (Conquistas Completas)**
+- **Header com contador:**
+  - Título "Conquistas"
+  - Badge mostra total desbloqueado (ex: 3/17)
+  - Botão voltar
+- **Filtros horizontais:**
+  - Todas, Tarefas, Streaks, XP, Tempo
+  - Filtro ativo destacado em azul primário
+  - Scroll horizontal suave
+- **17 conquistas organizadas:**
+  - **Tarefas (6):** Primeira Tarefa, Iniciante, Dedicado, Centenário, Madrugador, Noturno
+  - **Streaks (4):** 7 dias, 15 dias, 30 dias, 100 dias
+  - **XP (5):** Aprendiz (500 XP), Experiente (1000 XP), Mestre (5000 XP), Produtivo (Nível 10), Elite (Nível 25)
+  - **Tempo (2):** Focado (100 min), Maratonista (500 min)
+- **Visual:**
+  - Grid 2 colunas responsivo
+  - Cards interativos com sombras
+  - Ícones coloridos em círculos
+  - Conquistas bloqueadas com opacidade 0.6
+  - Barra de progresso para conquistas em andamento
+  - Badge verde com check para desbloqueadas
+- **Integração com userStore:**
+  - Progresso dinâmico baseado em streak, level, totalXP
+  - Atualização em tempo real
+
+⚙️ **SettingsScreen (Configurações)**
+- **Aparência:**
+  - Toggle funcional de Dark Mode (integrado com themeStore)
+  - Alterna entre tema claro e escuro instantaneamente
+- **Notificações (placeholders):**
+  - Lembretes de Tarefas
+  - Conquistas
+- **Conta (placeholders):**
+  - Editar Perfil
+  - Alterar Senha
+  - Privacidade
+- **Sobre:**
+  - Versão do App: 1.0.0
+- **Design:**
+  - Cards organizados por seção
+  - Switches nativos para toggles
+  - Chevrons para navegação
+  - Headers de seção em uppercase
+
+❓ **HelpScreen (Ajuda e Suporte)**
+- **Contato Rápido:**
+  - Email → abre mailto:suporte@vidamobile.com
+  - WhatsApp → abre wa.me com número de suporte
+  - Cards interativos com ícones coloridos
+- **6 FAQs expansíveis:**
+  - Como funciona o sistema de XP?
+  - O que é a sequência (streak)?
+  - Como adicionar uma nova tarefa?
+  - Posso editar ou excluir tarefas?
+  - Por que algumas tarefas estão bloqueadas?
+  - Como funcionam as conquistas?
+  - Expansão/colapso com animação suave
+- **Links Úteis (placeholders):**
+  - Termos de Uso
+  - Política de Privacidade
+  - Sobre o VIDA
+  - Ícone de "open" indicando link externo
+
+🗂️ **Navegação Completa**
+- **AppNavigator (Root):**
+```
+  AppNavigator
+  ├─ Auth (Stack) → Welcome/Login/Register
+  ├─ Onboarding (Screen)
+  └─ Main (Tabs)
+      ├─ Dashboard
+      ├─ Routine
+      ├─ Social (placeholder)
+      └─ Profile (Stack)
+          ├─ ProfileMain
+          ├─ Settings
+          ├─ Help
+          └─ Achievements
+```
+- **ProfileNavigator:**
+  - Stack interno para navegação na seção Profile
+  - Animações slide_from_right
+  - Header oculto (usa headers customizados)
 
 ### O que ainda não foi desenvolvido:
 
 - Tela Social (Feed de momento único, Conexões via NFC/QR)
-- Tela Perfil (Estatísticas detalhadas, Histórico, Conquistas)
 - Integração real com IA Gemini (geração de rotina baseada nos dados)
 - Persistência de dados (Backend com Supabase)
 - Sistema de gamificação completo (XP real, níveis, conquistas desbloqueáveis)
@@ -400,7 +525,8 @@ vida-mobile/
     ├── navigation/
     │   ├── AppNavigator.tsx
     │   ├── AuthNavigator.tsx
-    │   ├── MainNavigator.tsx
+    │   ├── MainNavigator.ts
+    │   ├── ProfileNavigator.tsx
     │   └── types.ts
     ├── screens/
     │   ├── auth/
@@ -412,10 +538,16 @@ vida-mobile/
     │   │   └── OnboardingScreen.tsx
     │   ├── profile/
     │   │   └── ProfileScreen.tsx
-    │   └── routine/
-    │       └── RoutineScreen.tsx
-    |   └── welcome/
-    │       └── WelcomeScreen.tsx
+    │   ├──── routine/
+    │   │   └── RoutineScreen.tsx
+    |   ├──── welcome/
+    │   │   └── WelcomeScreen.tsx
+    |   ├── achievements/
+    │   │   └── AchievementsScreen.tsx
+    │   ├── settings/
+    │   │   └── SettingsScreen.tsx
+    │   └── help/
+    │       └── HelpScreen.tsx
     │
     ├── services/
     │   ├── api/

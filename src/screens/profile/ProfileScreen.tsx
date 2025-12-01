@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks';
 import { useAuthStore, useUserStore } from '@/store';
 import { Card, Badge } from '@/components/ui';
 import { AvatarWithStreak, StreakInfoModal } from '@/components/features';
+import { mockDashboardData } from '@/services/mock/dashboardData';
 
 const { width } = Dimensions.get('window');
 
@@ -34,7 +35,10 @@ export default function ProfileScreen() {
     const { colors, theme } = useTheme();
     const navigation = useNavigation();
     const { logout } = useAuthStore();
-    const { user } = useUserStore();
+    const { user: storeUser } = useUserStore();
+
+    // ✅ SOLUÇÃO: Usar mock data se userStore estiver vazio
+    const user = storeUser || mockDashboardData.user;
 
     const [streakInfoVisible, setStreakInfoVisible] = React.useState(false);
 
@@ -45,6 +49,8 @@ export default function ProfileScreen() {
 
     useEffect(() => {
         startAnimations();
+        console.log('📊 User data:', user);
+        console.log('🔥 Streak:', user?.streak);
     }, []);
 
     const startAnimations = () => {
@@ -80,7 +86,9 @@ export default function ProfileScreen() {
                     text: 'Sair',
                     style: 'destructive',
                     onPress: () => {
+                        console.log('🚪 Logout iniciado...');
                         logout();
+                        console.log('✅ Logout concluído');
                     },
                 },
             ]
@@ -95,7 +103,7 @@ export default function ProfileScreen() {
         navigation.navigate('Achievements' as never);
     };
 
-    // Mock de conquistas com estatísticas integradas (PRIMEIRAS 6)
+    // Mock de conquistas
     const allAchievements: Achievement[] = [
         {
             id: '1',
@@ -158,7 +166,7 @@ export default function ProfileScreen() {
             icon: 'flash',
             color: '#F59E0B',
             unlocked: false,
-            progress: user?.totalXP || 0,
+            progress: user?.currentXP || 0,
             maxProgress: 1000,
         },
         {
@@ -173,7 +181,6 @@ export default function ProfileScreen() {
         },
     ];
 
-    // Mostrar apenas as 6 primeiras
     const achievements = allAchievements.slice(0, 6);
     const totalAchievements = allAchievements.length;
 
@@ -215,21 +222,24 @@ export default function ProfileScreen() {
                             },
                         ]}
                     >
-                        {/* Avatar com Streak (padrão da Dashboard) */}
+                        {/* Avatar com Streak */}
                         <View style={styles.avatarRow}>
                             <AvatarWithStreak
-                                name={user?.name || 'Usuário'}
-                                streak={user?.streak || 0}
+                                name={user.name}
+                                streak={user.streak}
                                 size={96}
-                                onStreakPress={() => setStreakInfoVisible(true)}
+                                onStreakPress={() => {
+                                    console.log('🔥 Streak badge clicado, valor:', user.streak);
+                                    setStreakInfoVisible(true);
+                                }}
                             />
                         </View>
 
                         <Text style={[styles.name, { color: colors.text }]}>
-                            {user?.name || 'Usuário'}
+                            {user.name}
                         </Text>
                         <Text style={[styles.email, { color: colors.textSecondary }]}>
-                            {user?.email || 'email@exemplo.com'}
+                            {storeUser?.email || 'email@exemplo.com'}
                         </Text>
 
                         {/* Card de Nível + XP */}
@@ -237,10 +247,10 @@ export default function ProfileScreen() {
                             <View style={styles.levelHeader}>
                                 <View style={[styles.levelBadge, { backgroundColor: theme.primary }]}>
                                     <Ionicons name="trophy" size={16} color="#ffffff" />
-                                    <Text style={styles.levelBadgeText}>Nível {user?.level || 1}</Text>
+                                    <Text style={styles.levelBadgeText}>Nível {user.level}</Text>
                                 </View>
                                 <Text style={[styles.xpText, { color: colors.textSecondary }]}>
-                                    {user?.currentXP || 0} / {user?.nextLevelXP || 100} XP
+                                    {user.currentXP} / {user.nextLevelXP} XP
                                 </Text>
                             </View>
 
@@ -251,17 +261,14 @@ export default function ProfileScreen() {
                                         styles.xpBar,
                                         {
                                             backgroundColor: theme.primary,
-                                            width: `${((user?.currentXP || 0) / (user?.nextLevelXP || 100)) * 100
-                                                }%`,
+                                            width: `${((user.currentXP || 0) / (user.nextLevelXP || 100)) * 100}%`,
                                         },
                                     ]}
                                 />
                             </View>
 
                             <Text style={[styles.xpLabel, { color: colors.textSecondary }]}>
-                                {Math.round(
-                                    ((user?.currentXP || 0) / (user?.nextLevelXP || 100)) * 100
-                                )}% para o próximo nível
+                                {Math.round(((user.currentXP || 0) / (user.nextLevelXP || 100)) * 100)}% para o próximo nível
                             </Text>
                         </Card>
                     </Animated.View>
@@ -364,7 +371,7 @@ export default function ProfileScreen() {
                                                             {
                                                                 backgroundColor: achievement.color,
                                                                 width: `${((achievement.progress || 0) /
-                                                                        (achievement.maxProgress || 1)) *
+                                                                    (achievement.maxProgress || 1)) *
                                                                     100
                                                                     }%`,
                                                             },
@@ -467,10 +474,14 @@ export default function ProfileScreen() {
                 </ScrollView>
             </Animated.View>
 
+            {/* Modal de Streak Info */}
             <StreakInfoModal
                 visible={streakInfoVisible}
-                currentStreak={user?.streak || 0}
-                onClose={() => setStreakInfoVisible(false)}
+                currentStreak={user.streak}
+                onClose={() => {
+                    console.log('❌ Modal de streak fechado');
+                    setStreakInfoVisible(false);
+                }}
             />
         </SafeAreaView>
     );
@@ -616,7 +627,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: '100%',
-        borderRadius: 2,
+        borderRadius: 4,
     },
     progressText: {
         fontSize: 10,
@@ -652,14 +663,5 @@ const styles = StyleSheet.create({
     },
     logoutButton: {
         marginTop: 8,
-    },
-    logoutContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    logoutText: {
-        fontSize: 16,
-        fontFamily: 'Nunito_700Bold',
     },
 });
