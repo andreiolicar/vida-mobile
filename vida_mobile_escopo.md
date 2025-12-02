@@ -1,10 +1,10 @@
-# VIDA Mobile — Documento de Escopo Completo (Versão 1)
+# VIDA Mobile — Documento de Escopo Completo
 
 ## 1. Visão Geral
 
 VIDA Mobile é um aplicativo multiplataforma (iOS e Android) focado em organização cotidiana, produtividade assistida por IA e relações sociais saudáveis. Construído com React Native e integrado à API do Google Gemini, o app busca aumentar o bem-estar dos usuários por meio de rotinas inteligentes, tarefas otimizadas, insights personalizados e uma camada social minimalista que fomenta vínculos reais, não dopamina barata.
 
-A estética segue princípios minimalistas inspirados no Duolingo, porém com identidade visual própria, baseada em tons de azul claro — principalmente **#0052e2**.
+O design segue princípios minimalistas inspirados no Duolingo, porém com identidade visual própria, baseada em tons de azul claro — principalmente **#0052e2**.
 
 ---
 
@@ -104,11 +104,6 @@ Exibe:
 - Storage para imagens
 
 ### 5.3 Integração com IA
-Endpoints internos:
-- `/ai/generate-routine`
-- `/ai/daily-insight`
-- `/ai/analyze-journal`
-- `/ai/prioritize-task`
 
 Fluxos principais:
 - Onboarding IA
@@ -406,27 +401,6 @@ Interfaces semelhantes ao Duolingo:
   - Política de Privacidade
   - Sobre o VIDA
   - Ícone de "open" indicando link externo
-
-🗂️ **Navegação Completa**
-- **AppNavigator (Root):**
-```
-  AppNavigator
-  ├─ Auth (Stack) → Welcome/Login/Register
-  ├─ Onboarding (Screen)
-  └─ Main (Tabs)
-      ├─ Dashboard
-      ├─ Routine
-      ├─ Social (placeholder)
-      └─ Profile (Stack)
-          ├─ ProfileMain
-          ├─ Settings
-          ├─ Help
-          └─ Achievements
-```
-- **ProfileNavigator:**
-  - Stack interno para navegação na seção Profile
-  - Animações slide_from_right
-  - Header oculto (usa headers customizados)
 
 ### O que ainda não foi desenvolvido:
 
