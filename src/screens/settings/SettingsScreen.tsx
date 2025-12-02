@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     Switch,
+    Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -20,10 +21,80 @@ export default function SettingsScreen() {
 
     const isDarkMode = mode === 'dark';
 
+    // Animações
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const headerAnim = useRef(new Animated.Value(0)).current;
+    const appearanceAnim = useRef(new Animated.Value(0)).current;
+    const notificationsAnim = useRef(new Animated.Value(0)).current;
+    const accountAnim = useRef(new Animated.Value(0)).current;
+    const aboutAnim = useRef(new Animated.Value(0)).current;
+
+    const [taskReminders, setTaskReminders] = React.useState(true);
+    const [achievementsNotif, setAchievementsNotif] = React.useState(true);
+
+    useEffect(() => {
+        startAnimations();
+    }, []);
+
+    const startAnimations = () => {
+        Animated.sequence([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.stagger(100, [
+                Animated.timing(headerAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(appearanceAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(notificationsAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(accountAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(aboutAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+            ]),
+        ]).start();
+    };
+
+    const createAnimatedStyle = (animValue: Animated.Value) => ({
+        opacity: animValue,
+        transform: [
+            {
+                translateY: animValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                }),
+            },
+        ],
+    });
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.card }]}>
+            <Animated.View
+                style={[
+                    styles.header,
+                    { backgroundColor: colors.card },
+                    createAnimatedStyle(headerAnim),
+                ]}
+            >
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
@@ -34,175 +105,191 @@ export default function SettingsScreen() {
                     Configurações
                 </Text>
                 <View style={styles.placeholder} />
-            </View>
+            </Animated.View>
 
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Aparência */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-                        APARÊNCIA
-                    </Text>
-
-                    <View
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="moon" size={24} color={colors.text} />
-                            <View style={styles.settingText}>
-                                <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                    Modo Escuro
-                                </Text>
-                                <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                                    Tema escuro para reduzir o cansaço visual
-                                </Text>
-                            </View>
-                        </View>
-                        <Switch
-                            value={isDarkMode}
-                            onValueChange={toggleTheme}
-                            trackColor={{ false: colors.border, true: theme.primary }}
-                            thumbColor="#ffffff"
-                        />
-                    </View>
-                </View>
-
-                {/* Notificações */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-                        NOTIFICAÇÕES
-                    </Text>
-
-                    <View
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="notifications" size={24} color={colors.text} />
-                            <View style={styles.settingText}>
-                                <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                    Lembretes de Tarefas
-                                </Text>
-                                <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                                    Receba notificações sobre suas tarefas
-                                </Text>
-                            </View>
-                        </View>
-                        <Switch
-                            value={true}
-                            trackColor={{ false: colors.border, true: theme.primary }}
-                            thumbColor="#ffffff"
-                        />
-                    </View>
-
-                    <View
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="trophy" size={24} color={colors.text} />
-                            <View style={styles.settingText}>
-                                <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                    Conquistas
-                                </Text>
-                                <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                                    Notificações de novas conquistas
-                                </Text>
-                            </View>
-                        </View>
-                        <Switch
-                            value={true}
-                            trackColor={{ false: colors.border, true: theme.primary }}
-                            thumbColor="#ffffff"
-                        />
-                    </View>
-                </View>
-
-                {/* Conta */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-                        CONTA
-                    </Text>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="person" size={24} color={colors.text} />
-                            <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                Editar Perfil
-                            </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="lock-closed" size={24} color={colors.text} />
-                            <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                Alterar Senha
-                            </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="shield-checkmark" size={24} color={colors.text} />
-                            <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                Privacidade
-                            </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Sobre */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-                        SOBRE
-                    </Text>
-
-                    <View
-                        style={[
-                            styles.settingItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                    >
-                        <View style={styles.settingLeft}>
-                            <Ionicons name="information-circle" size={24} color={colors.text} />
-                            <Text style={[styles.settingTitle, { color: colors.text }]}>
-                                Versão do App
-                            </Text>
-                        </View>
-                        <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-                            1.0.0
+            <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                    {/* Aparência */}
+                    <Animated.View style={[styles.section, createAnimatedStyle(appearanceAnim)]}>
+                        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                            APARÊNCIA
                         </Text>
-                    </View>
-                </View>
-            </ScrollView>
+
+                        <View
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="moon" size={24} color={colors.text} />
+                                <View style={styles.settingText}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Modo Escuro
+                                    </Text>
+                                    <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                                        Tema escuro para reduzir o cansaço visual
+                                    </Text>
+                                </View>
+                            </View>
+                            <Switch
+                                value={isDarkMode}
+                                onValueChange={toggleTheme}
+                                trackColor={{
+                                    false: colors.border,
+                                    true: `${theme.primary}60`,
+                                }}
+                                thumbColor={isDarkMode ? theme.primary : '#f4f3f4'}
+                                ios_backgroundColor={colors.border}
+                            />
+                        </View>
+                    </Animated.View>
+
+                    {/* Notificações */}
+                    <Animated.View style={[styles.section, createAnimatedStyle(notificationsAnim)]}>
+                        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                            NOTIFICAÇÕES
+                        </Text>
+
+                        <View
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="notifications" size={24} color={colors.text} />
+                                <View style={styles.settingText}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Lembretes de Tarefas
+                                    </Text>
+                                    <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                                        Receba notificações sobre suas tarefas
+                                    </Text>
+                                </View>
+                            </View>
+                            <Switch
+                                value={taskReminders}
+                                onValueChange={setTaskReminders}
+                                trackColor={{
+                                    false: colors.border,
+                                    true: `${theme.primary}60`,
+                                }}
+                                thumbColor={taskReminders ? theme.primary : '#0052e2'}
+                                ios_backgroundColor={colors.border}
+                            />
+                        </View>
+
+                        <View
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="trophy" size={24} color={colors.text} />
+                                <View style={styles.settingText}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Conquistas
+                                    </Text>
+                                    <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                                        Notificações de novas conquistas
+                                    </Text>
+                                </View>
+                            </View>
+                            <Switch
+                                value={achievementsNotif}
+                                onValueChange={setAchievementsNotif}
+                                trackColor={{
+                                    false: colors.border,
+                                    true: `${theme.primary}60`,
+                                }}
+                                thumbColor={achievementsNotif ? theme.primary : '#0052e2'}
+                                ios_backgroundColor={colors.border}
+                            />
+                        </View>
+                    </Animated.View>
+
+                    {/* Conta */}
+                    <Animated.View style={[styles.section, createAnimatedStyle(accountAnim)]}>
+                        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                            CONTA
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="person" size={24} color={colors.text} />
+                                <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                    Editar Perfil
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="lock-closed" size={24} color={colors.text} />
+                                <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                    Alterar Senha
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="shield-checkmark" size={24} color={colors.text} />
+                                <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                    Privacidade
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </Animated.View>
+
+                    {/* Sobre */}
+                    <Animated.View style={[styles.section, createAnimatedStyle(aboutAnim)]}>
+                        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                            SOBRE
+                        </Text>
+
+                        <View
+                            style={[
+                                styles.settingItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                        >
+                            <View style={styles.settingLeft}>
+                                <Ionicons name="information-circle" size={24} color={colors.text} />
+                                <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                    Versão do App
+                                </Text>
+                            </View>
+                            <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+                                1.0.0
+                            </Text>
+                        </View>
+                    </Animated.View>
+                </ScrollView>
+            </Animated.View>
         </SafeAreaView>
     );
 }

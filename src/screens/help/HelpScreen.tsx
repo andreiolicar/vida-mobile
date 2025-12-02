@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     Linking,
+    Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -23,6 +24,52 @@ export default function HelpScreen() {
     const { colors, theme } = useTheme();
     const navigation = useNavigation();
     const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    // Animações de entrada inicial
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const headerAnim = useRef(new Animated.Value(0)).current;
+    const contactAnim = useRef(new Animated.Value(0)).current;
+    const faqAnim = useRef(new Animated.Value(0)).current;
+    const linksAnim = useRef(new Animated.Value(0)).current;
+
+
+
+    useEffect(() => {
+        startInitialAnimations();
+    }, []);
+
+    const startInitialAnimations = () => {
+        Animated.sequence([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+            Animated.timing(headerAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(contactAnim, {
+                toValue: 1,
+                duration: 300,
+                delay: 50,
+                useNativeDriver: true,
+            }),
+            Animated.timing(faqAnim, {
+                toValue: 1,
+                duration: 300,
+                delay: 50,
+                useNativeDriver: true,
+            }),
+            Animated.timing(linksAnim, {
+                toValue: 1,
+                duration: 300,
+                delay: 50,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
     const faqs: FAQ[] = [
         {
@@ -77,179 +124,252 @@ export default function HelpScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.card }]}>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={styles.backButton}
+            <Animated.View
+                style={[
+                    styles.wrapper,
+                    {
+                        opacity: fadeAnim,
+                    },
+                ]}
+            >
+                {/* Header */}
+                <Animated.View
+                    style={[
+                        styles.header,
+                        { backgroundColor: colors.card },
+                        {
+                            opacity: headerAnim,
+                            transform: [
+                                {
+                                    translateY: headerAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [-20, 0],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
                 >
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>
-                    Ajuda e Suporte
-                </Text>
-                <View style={styles.placeholder} />
-            </View>
-
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Contato Rápido */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Precisa de ajuda imediata?
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        style={styles.backButton}
+                    >
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>
+                        Ajuda e Suporte
                     </Text>
+                    <View style={styles.placeholder} />
+                </Animated.View>
 
-                    <View style={styles.contactRow}>
-                        <TouchableOpacity
-                            style={[
-                                styles.contactCard,
-                                { backgroundColor: colors.card, borderColor: colors.border },
-                            ]}
-                            onPress={handleEmail}
-                            activeOpacity={0.7}
-                        >
-                            <View
+                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                    {/* Contato Rápido */}
+                    <Animated.View
+                        style={[
+                            styles.section,
+                            {
+                                opacity: contactAnim,
+                                transform: [
+                                    {
+                                        translateY: contactAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [30, 0],
+                                        }),
+                                    },
+                                ],
+                            },
+                        ]}
+                    >
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                            Precisa de ajuda imediata?
+                        </Text>
+
+                        <View style={styles.contactRow}>
+                            <TouchableOpacity
                                 style={[
-                                    styles.contactIcon,
-                                    { backgroundColor: `${theme.primary}20` },
+                                    styles.contactCard,
+                                    { backgroundColor: colors.card, borderColor: colors.border },
                                 ]}
+                                onPress={handleEmail}
+                                activeOpacity={0.7}
                             >
-                                <Ionicons name="mail" size={24} color={theme.primary} />
-                            </View>
-                            <Text style={[styles.contactLabel, { color: colors.text }]}>
-                                Email
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[
-                                styles.contactCard,
-                                { backgroundColor: colors.card, borderColor: colors.border },
-                            ]}
-                            onPress={handleWhatsApp}
-                            activeOpacity={0.7}
-                        >
-                            <View
-                                style={[
-                                    styles.contactIcon,
-                                    { backgroundColor: `${theme.success}20` },
-                                ]}
-                            >
-                                <Ionicons name="logo-whatsapp" size={24} color={theme.success} />
-                            </View>
-                            <Text style={[styles.contactLabel, { color: colors.text }]}>
-                                WhatsApp
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* FAQ */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Perguntas Frequentes
-                    </Text>
-
-                    {faqs.map((faq) => {
-                        const isExpanded = expandedId === faq.id;
-
-                        return (
-                            <Card
-                                key={faq.id}
-                                variant="duolingo"
-                                style={styles.faqCard}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => toggleFAQ(faq.id)}
-                                    activeOpacity={0.7}
+                                <View
+                                    style={[
+                                        styles.contactIcon,
+                                        { backgroundColor: `${theme.primary}20` },
+                                    ]}
                                 >
-                                    <View style={styles.faqHeader}>
-                                        <Text style={[styles.faqQuestion, { color: colors.text }]}>
-                                            {faq.question}
-                                        </Text>
-                                        <Ionicons
-                                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                                            size={20}
-                                            color={colors.textSecondary}
-                                        />
-                                    </View>
+                                    <Ionicons name="mail" size={24} color={theme.primary} />
+                                </View>
+                                <Text style={[styles.contactLabel, { color: colors.text }]}>
+                                    Email
+                                </Text>
+                            </TouchableOpacity>
 
-                                    {isExpanded && (
-                                        <Text
-                                            style={[
-                                                styles.faqAnswer,
-                                                { color: colors.textSecondary },
-                                            ]}
-                                        >
-                                            {faq.answer}
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                            </Card>
-                        );
-                    })}
-                </View>
-
-                {/* Links Úteis */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Links Úteis
-                    </Text>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.linkItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
-                        ]}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.linkLeft}>
-                            <Ionicons name="document-text" size={24} color={colors.text} />
-                            <Text style={[styles.linkText, { color: colors.text }]}>
-                                Termos de Uso
-                            </Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.contactCard,
+                                    { backgroundColor: colors.card, borderColor: colors.border },
+                                ]}
+                                onPress={handleWhatsApp}
+                                activeOpacity={0.7}
+                            >
+                                <View
+                                    style={[
+                                        styles.contactIcon,
+                                        { backgroundColor: `${theme.success}20` },
+                                    ]}
+                                >
+                                    <Ionicons name="logo-whatsapp" size={24} color={theme.success} />
+                                </View>
+                                <Text style={[styles.contactLabel, { color: colors.text }]}>
+                                    WhatsApp
+                                </Text>
+                            </TouchableOpacity>
                         </View>
-                        <Ionicons name="open" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
+                    </Animated.View>
 
-                    <TouchableOpacity
+                    {/* FAQ */}
+                    <Animated.View
                         style={[
-                            styles.linkItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
+                            styles.section,
+                            {
+                                opacity: faqAnim,
+                                transform: [
+                                    {
+                                        translateY: faqAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [30, 0],
+                                        }),
+                                    },
+                                ],
+                            },
                         ]}
-                        activeOpacity={0.7}
                     >
-                        <View style={styles.linkLeft}>
-                            <Ionicons name="shield-checkmark" size={24} color={colors.text} />
-                            <Text style={[styles.linkText, { color: colors.text }]}>
-                                Política de Privacidade
-                            </Text>
-                        </View>
-                        <Ionicons name="open" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                            Perguntas Frequentes
+                        </Text>
 
-                    <TouchableOpacity
+                        {faqs.map((faq, index) => {
+                            const isExpanded = expandedId === faq.id;
+
+                            return (
+                                <Card
+                                    key={faq.id}
+                                    variant="duolingo"
+                                    style={styles.faqCard}
+                                >
+                                    <TouchableOpacity
+                                        onPress={() => toggleFAQ(faq.id)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={styles.faqHeader}>
+                                            <Text style={[styles.faqQuestion, { color: colors.text }]}>
+                                                {faq.question}
+                                            </Text>
+                                            <Ionicons
+                                                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                                                size={20}
+                                                color={colors.textSecondary}
+                                            />
+                                        </View>
+
+                                        {isExpanded && (
+                                            <Text
+                                                style={[
+                                                    styles.faqAnswer,
+                                                    { color: colors.textSecondary },
+                                                ]}
+                                            >
+                                                {faq.answer}
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </Card>
+                            );
+                        })}
+                    </Animated.View>
+
+                    {/* Links Úteis */}
+                    <Animated.View
                         style={[
-                            styles.linkItem,
-                            { backgroundColor: colors.card, borderColor: colors.border },
+                            styles.section,
+                            {
+                                opacity: linksAnim,
+                                transform: [
+                                    {
+                                        translateY: linksAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [30, 0],
+                                        }),
+                                    },
+                                ],
+                            },
                         ]}
-                        activeOpacity={0.7}
                     >
-                        <View style={styles.linkLeft}>
-                            <Ionicons name="information-circle" size={24} color={colors.text} />
-                            <Text style={[styles.linkText, { color: colors.text }]}>
-                                Sobre o VIDA
-                            </Text>
-                        </View>
-                        <Ionicons name="open" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                            Links Úteis
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.linkItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.linkLeft}>
+                                <Ionicons name="document-text" size={24} color={colors.text} />
+                                <Text style={[styles.linkText, { color: colors.text }]}>
+                                    Termos de Uso
+                                </Text>
+                            </View>
+                            <Ionicons name="open" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.linkItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.linkLeft}>
+                                <Ionicons name="shield-checkmark" size={24} color={colors.text} />
+                                <Text style={[styles.linkText, { color: colors.text }]}>
+                                    Política de Privacidade
+                                </Text>
+                            </View>
+                            <Ionicons name="open" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.linkItem,
+                                { backgroundColor: colors.card, borderColor: colors.border },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.linkLeft}>
+                                <Ionicons name="information-circle" size={24} color={colors.text} />
+                                <Text style={[styles.linkText, { color: colors.text }]}>
+                                    Sobre o VIDA
+                                </Text>
+                            </View>
+                            <Ionicons name="open" size={20} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </Animated.View>
+                </ScrollView>
+            </Animated.View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+    },
+    wrapper: {
         flex: 1,
     },
     header: {
